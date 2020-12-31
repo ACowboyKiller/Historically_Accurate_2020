@@ -63,7 +63,7 @@ public class Country : MonoBehaviour
     /// </summary>
     public bool BuyWorkForceToken()
     {
-        if (_fundingPoints < _tokenCost) return false;
+        if (_workforceTokens < 3 && _fundingPoints < _tokenCost) return false;
         _fundingPoints -= _tokenCost;
         _tokenCost *= 2;
         _workforceTokens++;
@@ -89,7 +89,7 @@ public class Country : MonoBehaviour
     {
         if (_pSuccess)
         {
-            /// TODO:   Play some animation
+            _launchQTE.RocketAnim();
             _level++;
             if (_level >= 11) GameManager.instance.WinGame(this);
             _nationalPride += 250;
@@ -112,6 +112,12 @@ public class Country : MonoBehaviour
     }
 
     /// <summary>
+    /// Begins the launch qte
+    /// </summary>
+    /// <param name="_pbool"></param>
+    public void LaunchQTE(bool _pEmpty = false) => _launchQTE.Init();
+
+    /// <summary>
     /// Performs some animation whenever a public test is completed
     /// </summary>
     public void CompleteTest(bool _pSuccess = false)
@@ -119,6 +125,7 @@ public class Country : MonoBehaviour
         if (_pSuccess)
         {
             /// TODO:   Play some animation
+            _testQTE.RocketAnim();
             _nationalPride += 250;
             //_prideStream = _prideStream;
             _fundingPoints -= fundingCosts[countryName][_level];
@@ -137,6 +144,12 @@ public class Country : MonoBehaviour
             //_researchValue = _researchValue;
         }
     }
+
+    /// <summary>
+    /// Begins the test qte
+    /// </summary>
+    /// <param name="_pbool"></param>
+    public void TestQTE(bool _pEmpty = false) => _testQTE.Init();
 
     /// <summary>
     /// Performs some animation whenever a research report is completed
@@ -163,6 +176,15 @@ public class Country : MonoBehaviour
             //_researchPoints = _researchPoints;
             //_researchValue = _researchValue;
         }
+    }
+
+    /// <summary>
+    /// Begins the report qte
+    /// </summary>
+    /// <param name="_pbool"></param>
+    public void ReportQTE(bool _pEmpty = false)
+    {
+        //  TODO:   Launch QTE
     }
 
     /// <summary>
@@ -193,6 +215,15 @@ public class Country : MonoBehaviour
     }
 
     /// <summary>
+    /// Begins the propaganda qte
+    /// </summary>
+    /// <param name="_pbool"></param>
+    public void PropagandaQTE(bool _pEmpty = false)
+    {
+        //  TODO:   Launch QTE
+    }
+
+    /// <summary>
     /// Performs some animation whenever an expirement is completed and updates the research point total
     /// </summary>
     public void CompleteExperiment(bool _pSuccess = false)
@@ -217,42 +248,6 @@ public class Country : MonoBehaviour
             //_researchPoints = _researchPoints;
             //_researchValue = _researchValue;
         }
-    }
-
-    /// <summary>
-    /// Begins the launch qte
-    /// </summary>
-    /// <param name="_pbool"></param>
-    public void LaunchQTE(bool _pEmpty = false)
-    {
-        //  TODO:   Launch QTE
-    }
-
-    /// <summary>
-    /// Begins the test qte
-    /// </summary>
-    /// <param name="_pbool"></param>
-    public void TestQTE(bool _pEmpty = false)
-    {
-        //  TODO:   Launch QTE
-    }
-
-    /// <summary>
-    /// Begins the report qte
-    /// </summary>
-    /// <param name="_pbool"></param>
-    public void ReportQTE(bool _pEmpty = false)
-    {
-        //  TODO:   Launch QTE
-    }
-
-    /// <summary>
-    /// Begins the propaganda qte
-    /// </summary>
-    /// <param name="_pbool"></param>
-    public void PropagandaQTE(bool _pEmpty = false)
-    {
-        //  TODO:   Launch QTE
     }
 
     /// <summary>
@@ -285,6 +280,9 @@ public class Country : MonoBehaviour
 
     [SerializeField] private int _workforceTokens = 3;
     [SerializeField] private int _tokenCost = 1;
+
+    [SerializeField] private RocketQTE _launchQTE = null;
+    [SerializeField] private RocketQTE _testQTE = null;
 
     #endregion
 

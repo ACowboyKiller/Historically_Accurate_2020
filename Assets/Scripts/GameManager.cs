@@ -83,6 +83,11 @@ public class GameManager : MonoBehaviour
     public delegate void ProgressEvent();
     public ProgressEvent OnProgressFullEvent;
 
+    /// <summary>
+    /// Returns the canvas group for the gameplay background
+    /// </summary>
+    public CanvasGroup gameplayBackground => _gameplayBackground;
+
     #endregion
 
     #region --------------------    Public Methods
@@ -127,6 +132,11 @@ public class GameManager : MonoBehaviour
     /// The progress bar for the game's QTEs
     /// </summary>
     [SerializeField] private CustomProgressBar _progress = null;
+
+    /// <summary>
+    /// The canvas group for gameplay background
+    /// </summary>
+    [SerializeField] private CanvasGroup _gameplayBackground = null;
 
     #endregion
 

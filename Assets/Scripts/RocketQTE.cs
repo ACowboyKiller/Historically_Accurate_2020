@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
-public class LaunchQTE : MonoBehaviour
+public class RocketQTE : MonoBehaviour
 {
 
     #region --------------------    Public Enumerations
@@ -20,11 +20,45 @@ public class LaunchQTE : MonoBehaviour
 
     #region --------------------    Public Properties
 
-
+    /// <summary>
+    /// Returns the rocket's transform
+    /// </summary>
+    public Transform rocket => _rocket;
 
     #endregion
 
     #region --------------------    Public Methods
+
+    /// <summary>
+    /// Subscribes to the progress bars and updates the modifiers
+    /// </summary>
+    public void Init()
+    {
+        //  Reset
+        _complete = false;
+        _rocket.gameObject.SetActive(true);
+        _rocket.localPosition = Vector3.zero;
+        _smoke.Clear();
+
+        GameManager.instance.OnProgressFullEvent += CompleteEvent;
+        GameManager.instance.OnTimerEmptyEvent += FailEvent;
+
+        //  Begins countdown
+        GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
+    }
+
+    /// <summary>
+    /// Plays the rocket animation
+    /// </summary>
+    public void RocketAnim()
+    {
+        /// TODO:   Play a sound
+        _rocket.gameObject.SetActive(true);
+        _rocket.localPosition = Vector3.zero;
+        _smoke.Clear();
+        _rocket.DOLocalMoveY(0.002f, 3f).SetEase(Ease.InQuad).OnComplete(() => { rocket.gameObject.SetActive(false); });
+        _smoke.Play();
+    }
 
     /// <summary>
     /// Completed event
@@ -33,10 +67,14 @@ public class LaunchQTE : MonoBehaviour
     {
         _complete = true;
         _Unsubscribe();
-        _rocket.DOLocalMoveY(0.002f, 3f).SetEase(Ease.OutQuad);
-        _smoke.Play();
-        GameManager.playerCountry.CompleteLaunch(true);
-        /// TODO:   Play a sound
+        if (_action == ActionLabel.GameAction.Launch)
+        {
+            GameManager.playerCountry.CompleteLaunch(true);
+        }
+        else
+        {
+            GameManager.playerCountry.CompleteTest(true);
+        }
     }
 
     /// <summary>
@@ -44,9 +82,16 @@ public class LaunchQTE : MonoBehaviour
     /// </summary>
     public void FailEvent()
     {
-        gameObject.SetActive(false);
         _Unsubscribe();
-        GameManager.playerCountry.CompleteLaunch(false);
+        if (_action == ActionLabel.GameAction.Launch)
+        {
+            GameManager.playerCountry.CompleteLaunch(false);
+        }
+        else
+        {
+            GameManager.playerCountry.CompleteTest(false);
+        }
+        _rocket.gameObject.SetActive(false);
         /// TODO:   Play a sound
     }
 
@@ -58,29 +103,13 @@ public class LaunchQTE : MonoBehaviour
     private float _progressTime = 1f;
     private bool _complete = false;
 
+    [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Launch;
     [SerializeField] private Transform _rocket = null;
     [SerializeField] private ParticleSystem _smoke = null;
 
     #endregion
 
     #region --------------------    Private Methods
-
-    /// <summary>
-    /// Subscribes to the progress bars and updates the modifiers
-    /// </summary>
-    private void OnEnable()
-    {
-        //  Reset
-        _complete = false;
-        _rocket.localPosition = Vector3.zero;
-        _smoke.Clear();
-
-        GameManager.instance.OnProgressFullEvent += CompleteEvent;
-        GameManager.instance.OnTimerEmptyEvent += FailEvent;
-
-        //  Begins countdown
-        GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
-    }
 
     /// <summary>
     /// Unsubscribes from the progress bars
