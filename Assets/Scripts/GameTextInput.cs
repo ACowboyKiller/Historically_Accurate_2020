@@ -74,8 +74,8 @@ public class GameTextInput : MonoBehaviour
         //  Clear out cache if emptying text input
         _textValueCache = (_pValue == "") ? "" : _textValueCache;
 
-        //  Breakout if the value is unchanged
-        if (_pValue == _textValueCache || _pValue == "") return;
+        //  Breakout if the value is unchanged or if the player is currently performing a QTE
+        if (_pValue == _textValueCache || _pValue == "" || GameManager.instance.progressMod > 0f || GameManager.instance.timerMod < 0f) return;
 
         //  Used for determining if the text value will be reset to cache or if it will hold
         bool _isValid = false;

@@ -21,6 +21,15 @@ public class Country : MonoBehaviour
     #region --------------------    Public Properties
 
     /// <summary>
+    /// Used to determine the cost of each level to reach
+    /// </summary>
+    public static Dictionary<GameManager.CountryName, int[]> fundingCosts = new Dictionary<GameManager.CountryName, int[]>
+    {
+        { GameManager.CountryName.USA, new int[] { 100, 200, 300, 400, 500, 600, 700, 800, 900, 950 } },
+        { GameManager.CountryName.USSR, new int[] { 80, 180, 270, 370, 460, 560, 650, 750, 840, 950 } }
+    };
+
+    /// <summary>
     /// Returns the name of the country
     /// </summary>
     public GameManager.CountryName countryName => _countryName;
@@ -78,7 +87,28 @@ public class Country : MonoBehaviour
     /// </summary>
     public void CompleteLaunch(bool _pSuccess = false)
     {
-        /// TODO:   Play some animation
+        if (_pSuccess)
+        {
+            /// TODO:   Play some animation
+            _level++;
+            if (_level >= 11) GameManager.instance.WinGame(this);
+            _nationalPride += 250;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream += 10;
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
+        else
+        {
+            /// TODO:   Play some animation
+            _nationalPride -= 100;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream = Mathf.Max(_fundingStream - 3, 0);
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
     }
 
     /// <summary>
@@ -86,7 +116,26 @@ public class Country : MonoBehaviour
     /// </summary>
     public void CompleteTest(bool _pSuccess = false)
     {
-        /// TODO:   Play some animation
+        if (_pSuccess)
+        {
+            /// TODO:   Play some animation
+            _nationalPride += 250;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream += 10;
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
+        else
+        {
+            /// TODO:   Play some animation
+            _nationalPride -= 100;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream = Mathf.Max(_fundingStream - 3, 0);
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
     }
 
     /// <summary>
@@ -94,7 +143,26 @@ public class Country : MonoBehaviour
     /// </summary>
     public void CompleteReport(bool _pSuccess = false)
     {
-        /// TODO:   Play some animation
+        if (_pSuccess)
+        {
+            /// TODO:   Play some animation
+            _nationalPride += 250;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream += 10;
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
+        else
+        {
+            /// TODO:   Play some animation
+            _nationalPride -= 100;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream = Mathf.Max(_fundingStream - 3, 0);
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
     }
 
     /// <summary>
@@ -102,7 +170,26 @@ public class Country : MonoBehaviour
     /// </summary>
     public void CompletePropaganda(bool _pSuccess = false)
     {
-        /// TODO:   Play some animation
+        if (_pSuccess)
+        {
+            /// TODO:   Play some animation
+            _nationalPride += 250;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream += 10;
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
+        else
+        {
+            /// TODO:   Play some animation
+            _nationalPride -= 100;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream = Mathf.Max(_fundingStream - 3, 0);
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
     }
 
     /// <summary>
@@ -110,53 +197,71 @@ public class Country : MonoBehaviour
     /// </summary>
     public void CompleteExperiment(bool _pSuccess = false)
     {
-        _researchPoints += _researchValue;
-        /// TODO:   Play some animation
+        if (_pSuccess)
+        {
+            /// TODO:   Play some animation
+            _nationalPride += 250;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream += 10;
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
+        else
+        {
+            /// TODO:   Play some animation
+            _nationalPride -= 100;
+            //_prideStream = _prideStream;
+            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingStream = Mathf.Max(_fundingStream - 3, 0);
+            //_researchPoints = _researchPoints;
+            //_researchValue = _researchValue;
+        }
     }
 
     /// <summary>
     /// Begins the launch qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void LaunchQTE(bool _pbool = false)
+    public void LaunchQTE(bool _pEmpty = false)
     {
-
+        //  TODO:   Launch QTE
     }
 
     /// <summary>
     /// Begins the test qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void TestQTE(bool _pbool = false)
+    public void TestQTE(bool _pEmpty = false)
     {
-
+        //  TODO:   Launch QTE
     }
 
     /// <summary>
     /// Begins the report qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void ReportQTE(bool _pbool = false)
+    public void ReportQTE(bool _pEmpty = false)
     {
-
+        //  TODO:   Launch QTE
     }
 
     /// <summary>
     /// Begins the propaganda qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void PropagandaQTE(bool _pbool = false)
+    public void PropagandaQTE(bool _pEmpty = false)
     {
-
+        //  TODO:   Launch QTE
     }
 
     /// <summary>
     /// Begins the experiment qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void ExperimentQTE(bool _pbool = false)
+    public void ExperimentQTE(bool _pEmpty = false)
     {
-
+        //  TODO:   Launch QTE
     }
 
     #endregion
@@ -198,7 +303,7 @@ public class Country : MonoBehaviour
         DOTween.To(() => _prideTimer, x => _prideTimer = x, 1f, 1f).OnComplete(_StreamPride);
 
         //  Perform Stream
-        _nationalPride = Mathf.Clamp(_prideStream + _nationalPride, 0, 1000);
+        _nationalPride = Mathf.Max(_prideStream + _nationalPride, 0);
         /// TODO:   Play some animation
         
         //  Check for game end
@@ -218,7 +323,7 @@ public class Country : MonoBehaviour
         DOTween.To(() => _fundingTimer, x => _fundingTimer = x, 1f, 1f).OnComplete(_StreamFunding);
 
         //  Perform stream
-        _fundingPoints = Mathf.Clamp(_fundingPoints + _fundingStream, 0, 99999);
+        _fundingPoints = Mathf.Max(_fundingPoints + _fundingStream, 0);
         /// TODO:   Play some animation
     }
 
