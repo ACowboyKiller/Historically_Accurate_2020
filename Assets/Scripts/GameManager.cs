@@ -116,7 +116,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Moves to gameplay
     /// </summary>
-    public void MoveToGameplay(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_pPrevious); _gampeplay.DOFade(1f, 0.5f).SetEase(Ease.OutQuad); state = GameState.Gameplay; });
+    public void MoveToGameplay(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_pPrevious); _gameplay.DOFade(1f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_gameplay, true); _textInput.textInput.Select(); }); state = GameState.Gameplay; });
 
     /// <summary>
     /// Moves to results
@@ -140,19 +140,20 @@ public class GameManager : MonoBehaviour
     /// Selects the game language for gameplay
     /// </summary>
     /// <param name="_pCountry"></param>
-    public void SelectCountry(CountryName _pCountry)
+    public void SelectCountry(int _pCountry)
     {
         if (playerCountry != null) playerCountry.isPlayerControlled = false;
-        _countries.Find(c => c.countryName == _pCountry).isPlayerControlled = true;
+        _countries.Find(c => c.countryName == (CountryName)_pCountry).isPlayerControlled = true;
+        _labels.ForEach(l => l.Setup());
         _camTarget.position = playerCountry.transform.position;
-        DOTween.To(() => _virtualCam.m_Heading.m_Bias, x => _virtualCam.m_Heading.m_Bias = x, (_camTarget.position.x / 2f) * 90f, 2f);
+        DOTween.To(() => _transposer.m_Heading.m_Bias, x => _transposer.m_Heading.m_Bias = x, (_camTarget.position.x / -2f) * 90f, 2f);
     }
 
     /// <summary>
     /// Sets the game's difficulty
     /// </summary>
     /// <param name="_pDifficulty"></param>
-    public void SetDifficulty(GameDifficulty _pDifficulty) => difficulty = _pDifficulty;
+    public void SetDifficulty(int _pDifficulty) => difficulty = (GameDifficulty)_pDifficulty;
 
     /// <summary>
     /// Removes the gameplay background to show the country better
@@ -170,6 +171,14 @@ public class GameManager : MonoBehaviour
     {
         _gameplayBackground.DOFade(1f, 0.25f);
         _instructions.text = "Type the name of an action to be performed";
+    }
+
+    /// <summary>
+    /// Starts the game
+    /// </summary>
+    public void StartGame()
+    {
+        MoveToGameplay(_setup);
     }
 
     public void LoseGame(Country _pCountry)
@@ -192,7 +201,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private MeshRenderer _title = null;
     [SerializeField] private CanvasGroup _splash = null;
     [SerializeField] private CanvasGroup _setup = null;
-    [SerializeField] private CanvasGroup _gampeplay = null;
+    [SerializeField] private CanvasGroup _gameplay = null;
     [SerializeField] private CanvasGroup _results = null;
 
     /// <summary>
@@ -206,9 +215,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform _camTarget = null;
 
     /// <summary>
-    /// The virtual camera for the scene
+    /// The virtual camera
     /// </summary>
-    [SerializeField] private Cinemachine.CinemachineOrbitalTransposer _virtualCam = null;
+    [SerializeField] private Cinemachine.CinemachineVirtualCamera _cam = null;
+
+    /// <summary>
+    /// The virtual camera's transposer
+    /// </summary>
+    private Cinemachine.CinemachineOrbitalTransposer _transposer = null;
 
     /// <summary>
     /// The timer for the game's QTEs
@@ -219,6 +233,16 @@ public class GameManager : MonoBehaviour
     /// The progress bar for the game's QTEs
     /// </summary>
     [SerializeField] private CustomProgressBar _progress = null;
+
+    /// <summary>
+    /// The text input for the game
+    /// </summary>
+    [SerializeField] private GameTextInput _textInput = null;
+
+    /// <summary>
+    /// The list of action labels
+    /// </summary>
+    [SerializeField] private List<ActionLabel> _labels = new List<ActionLabel>();
 
     /// <summary>
     /// The canvas group for gameplay background
@@ -247,6 +271,11 @@ public class GameManager : MonoBehaviour
         Destroy(gameObject);
         return false;
     }
+
+    /// <summary>
+    /// Sets up the camera transposer
+    /// </summary>
+    private void Start() => _transposer = _cam.GetCinemachineComponent<Cinemachine.CinemachineOrbitalTransposer>();
 
     /// <summary>
     /// Used for updating the progress bars

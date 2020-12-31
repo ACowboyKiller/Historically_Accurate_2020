@@ -54,6 +54,11 @@ public class ActionLabel : MonoBehaviour
     #region --------------------    Public Methods
 
     /// <summary>
+    /// Sets up the label
+    /// </summary>
+    public void Setup() => _BuildActionsDictionary();
+
+    /// <summary>
     /// Invokes the action of the label
     /// </summary>
     public void Invoke()
@@ -95,10 +100,9 @@ public class ActionLabel : MonoBehaviour
     /// <summary>
     /// Grabs the text label
     /// </summary>
-    private void OnEnable()
+    private void Start()
     {
         _text = GetComponent<TMP_Text>();
-        _BuildActionsDictionary();
     }
 
     /// <summary>

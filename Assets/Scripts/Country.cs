@@ -231,7 +231,7 @@ public class Country : MonoBehaviour
         if (_pSuccess)
         {
             /// TODO:   Play some animation
-            _reportQTE.FlaskAnim();
+            _experimentQTE.FlaskAnim();
             //_nationalPride += 250;
             //_prideStream = _prideStream;
             _fundingPoints -= fundingCosts[countryName][_level] / 10;

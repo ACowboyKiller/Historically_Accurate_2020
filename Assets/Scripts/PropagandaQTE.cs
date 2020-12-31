@@ -44,6 +44,7 @@ public class PropagandaQTE : MonoBehaviour
 
         //  Begins countdown
         _isActive = true;
+        GameManager.instance.progressMod = 0f;
         GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
 
         //  Set progress time

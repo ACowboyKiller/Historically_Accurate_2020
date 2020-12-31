@@ -50,9 +50,8 @@ public class Tower : MonoBehaviour
     private void OnMouseDown()
     {
         if (!_qte.isActive) return;
-        GameManager.instance.progressBar.percent += (1f / _qte.towerCount);
         _sparks.Play();
-        transform.DOLocalMoveY(0f, 1f).OnComplete(() => { gameObject.SetActive(false); });
+        transform.DOLocalMoveY(0f, 1f).OnComplete(() => { gameObject.SetActive(false); GameManager.instance.progressBar.percent += (1f / _qte.towerCount); });
     }
 
     #endregion

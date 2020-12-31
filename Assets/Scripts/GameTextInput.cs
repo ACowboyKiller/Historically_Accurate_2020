@@ -21,6 +21,11 @@ public class GameTextInput : MonoBehaviour
         { "ExperimentLabel", new Dictionary<GameManager.CountryName, string> { { GameManager.CountryName.USA, "PERFORM EXPERIMENT" }, { GameManager.CountryName.USSR, "ISSLEDOVANIYE" } } }
     };
 
+    /// <summary>
+    /// Returns the text input
+    /// </summary>
+    public InputField textInput => _textInput;
+
     #endregion
 
     #region --------------------    Public Methods
