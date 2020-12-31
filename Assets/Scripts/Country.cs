@@ -182,10 +182,7 @@ public class Country : MonoBehaviour
     /// Begins the report qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void ReportQTE(bool _pEmpty = false)
-    {
-        //  TODO:   Launch QTE
-    }
+    public void ReportQTE(bool _pEmpty = false) => _reportQTE.Init();
 
     /// <summary>
     /// Performs some animation whenever propaganda is completed
@@ -218,10 +215,7 @@ public class Country : MonoBehaviour
     /// Begins the propaganda qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void PropagandaQTE(bool _pEmpty = false)
-    {
-        //  TODO:   Launch QTE
-    }
+    public void PropagandaQTE(bool _pEmpty = false) => _propagandaQTE.Init();
 
     /// <summary>
     /// Performs some animation whenever an expirement is completed and updates the research point total
@@ -254,10 +248,7 @@ public class Country : MonoBehaviour
     /// Begins the experiment qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void ExperimentQTE(bool _pEmpty = false)
-    {
-        //  TODO:   Launch QTE
-    }
+    public void ExperimentQTE(bool _pEmpty = false) => _experimentQTE.Init();
 
     #endregion
 
@@ -283,6 +274,9 @@ public class Country : MonoBehaviour
 
     [SerializeField] private RocketQTE _launchQTE = null;
     [SerializeField] private RocketQTE _testQTE = null;
+    [SerializeField] private FlaskQTE _experimentQTE = null;
+    [SerializeField] private FlaskQTE _reportQTE = null;
+    [SerializeField] private PropagandaQTE _propagandaQTE = null;
 
     #endregion
 

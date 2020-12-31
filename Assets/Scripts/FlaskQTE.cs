@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
-public class RocketQTE : MonoBehaviour
+public class FlaskQTE : MonoBehaviour
 {
 
     #region --------------------    Public Enumerations
@@ -21,9 +21,9 @@ public class RocketQTE : MonoBehaviour
     #region --------------------    Public Properties
 
     /// <summary>
-    /// Returns the rocket's transform
+    /// Returns the flask's transform
     /// </summary>
-    public Transform rocket => _rocket;
+    public Transform flask => _flask;
 
     #endregion
 
@@ -36,9 +36,8 @@ public class RocketQTE : MonoBehaviour
     {
         //  Reset
         _complete = false;
-        _rocket.gameObject.SetActive(true);
-        _rocket.localPosition = Vector3.zero;
-        _smoke.Clear();
+        _flask.gameObject.SetActive(true);
+        _chemicals.Clear();
 
         GameManager.instance.OnProgressFullEvent += CompleteEvent;
         GameManager.instance.OnTimerEmptyEvent += FailEvent;
@@ -47,21 +46,21 @@ public class RocketQTE : MonoBehaviour
         _isActive = true;
         GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
 
-        //  Set progress time
-        _progressTime = Random.Range(0.25f, 1.5f);
+        //  Determine click count
+        _clickCount = Random.Range(2f, 6f);
     }
 
     /// <summary>
-    /// Plays the rocket animation
+    /// Plays the flask animation
     /// </summary>
-    public void RocketAnim()
+    public void FlaskAnim()
     {
         /// TODO:   Play a sound
-        _rocket.gameObject.SetActive(true);
-        _rocket.localPosition = Vector3.zero;
-        _smoke.Clear();
-        _rocket.DOLocalMoveY(0.002f, 3f).SetEase(Ease.InQuad).OnComplete(() => { rocket.gameObject.SetActive(false); });
-        _smoke.Play();
+        _flask.gameObject.SetActive(true);
+        _flask.localPosition = Vector3.zero;
+        _chemicals.Clear();
+        _flask.DOLocalMoveY(0f, 3f).OnComplete(() => { _flask.gameObject.SetActive(false); });
+        _chemicals.Play();
     }
 
     /// <summary>
@@ -71,13 +70,13 @@ public class RocketQTE : MonoBehaviour
     {
         _complete = true;
         _Unsubscribe();
-        if (_action == ActionLabel.GameAction.Launch)
+        if (_action == ActionLabel.GameAction.Experiment)
         {
-            GameManager.playerCountry.CompleteLaunch(true);
+            GameManager.playerCountry.CompleteExperiment(true);
         }
         else
         {
-            GameManager.playerCountry.CompleteTest(true);
+            GameManager.playerCountry.CompleteReport(true);
         }
         _isActive = false;
     }
@@ -88,15 +87,15 @@ public class RocketQTE : MonoBehaviour
     public void FailEvent()
     {
         _Unsubscribe();
-        if (_action == ActionLabel.GameAction.Launch)
+        if (_action == ActionLabel.GameAction.Experiment)
         {
-            GameManager.playerCountry.CompleteLaunch(false);
+            GameManager.playerCountry.CompleteExperiment(false);
         }
         else
         {
-            GameManager.playerCountry.CompleteTest(false);
+            GameManager.playerCountry.CompleteReport(false);
         }
-        _rocket.gameObject.SetActive(false);
+        _flask.gameObject.SetActive(false);
         _isActive = false;
         /// TODO:   Play a sound
     }
@@ -107,12 +106,12 @@ public class RocketQTE : MonoBehaviour
 
     private bool _isActive = false;
     private float _timerTime = 3f;
-    private float _progressTime = 1f;
+    private float _clickCount = 0f;
     private bool _complete = false;
 
-    [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Launch;
-    [SerializeField] private Transform _rocket = null;
-    [SerializeField] private ParticleSystem _smoke = null;
+    [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Experiment;
+    [SerializeField] private Transform _flask = null;
+    [SerializeField] private ParticleSystem _chemicals = null;
 
     #endregion
 
@@ -133,21 +132,7 @@ public class RocketQTE : MonoBehaviour
     private void OnMouseDown()
     {
         if (!_isActive) return;
-        GameManager.instance.progressMod = (1 / _progressTime);
-    }
-
-    /// <summary>
-    /// If released too early
-    /// </summary>
-    private void OnMouseUp()
-    {
-        if (!_isActive) return;
-        if (!_complete)
-        {
-            GameManager.instance.timerMod = 5f;
-            GameManager.instance.progressMod = -5f;
-            FailEvent();
-        }
+        GameManager.instance.progressBar.percent += 1f / Mathf.Max(_clickCount, 1f);
     }
 
     #endregion

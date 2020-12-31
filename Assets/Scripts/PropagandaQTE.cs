@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
-public class RocketQTE : MonoBehaviour
+public class PropagandaQTE : MonoBehaviour
 {
 
     #region --------------------    Public Enumerations
@@ -21,9 +21,14 @@ public class RocketQTE : MonoBehaviour
     #region --------------------    Public Properties
 
     /// <summary>
-    /// Returns the rocket's transform
+    /// Returns whether or not the qte is active
     /// </summary>
-    public Transform rocket => _rocket;
+    public bool isActive => _isActive;
+
+    /// <summary>
+    /// Stores the number of towers to show
+    /// </summary>
+    public int towerCount { get; private set; } = 0;
 
     #endregion
 
@@ -36,9 +41,6 @@ public class RocketQTE : MonoBehaviour
     {
         //  Reset
         _complete = false;
-        _rocket.gameObject.SetActive(true);
-        _rocket.localPosition = Vector3.zero;
-        _smoke.Clear();
 
         GameManager.instance.OnProgressFullEvent += CompleteEvent;
         GameManager.instance.OnTimerEmptyEvent += FailEvent;
@@ -48,20 +50,27 @@ public class RocketQTE : MonoBehaviour
         GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
 
         //  Set progress time
-        _progressTime = Random.Range(0.25f, 1.5f);
+        towerCount = Random.Range(2, _towers.Count);
+        for (int i = 0; i < towerCount; i ++)
+        {
+            int _index = Random.Range(0, _towers.Count);
+            int _break = 0;
+            while (_towers[_index].gameObject.activeInHierarchy || _break < _towers.Count + 2)
+            {
+                _index = (_index + 1) % _towers.Count;
+                _break++;
+            }
+            _towers[_index].gameObject.SetActive(true);
+        }
     }
 
     /// <summary>
-    /// Plays the rocket animation
+    /// Plays the done animation
     /// </summary>
-    public void RocketAnim()
+    public void DoneAnim()
     {
+        _towers.ForEach(t => t.gameObject.SetActive(false));
         /// TODO:   Play a sound
-        _rocket.gameObject.SetActive(true);
-        _rocket.localPosition = Vector3.zero;
-        _smoke.Clear();
-        _rocket.DOLocalMoveY(0.002f, 3f).SetEase(Ease.InQuad).OnComplete(() => { rocket.gameObject.SetActive(false); });
-        _smoke.Play();
     }
 
     /// <summary>
@@ -71,15 +80,9 @@ public class RocketQTE : MonoBehaviour
     {
         _complete = true;
         _Unsubscribe();
-        if (_action == ActionLabel.GameAction.Launch)
-        {
-            GameManager.playerCountry.CompleteLaunch(true);
-        }
-        else
-        {
-            GameManager.playerCountry.CompleteTest(true);
-        }
+        GameManager.playerCountry.CompletePropaganda(true);
         _isActive = false;
+        _towers.ForEach(t => t.gameObject.SetActive(false));
     }
 
     /// <summary>
@@ -88,16 +91,9 @@ public class RocketQTE : MonoBehaviour
     public void FailEvent()
     {
         _Unsubscribe();
-        if (_action == ActionLabel.GameAction.Launch)
-        {
-            GameManager.playerCountry.CompleteLaunch(false);
-        }
-        else
-        {
-            GameManager.playerCountry.CompleteTest(false);
-        }
-        _rocket.gameObject.SetActive(false);
+        GameManager.playerCountry.CompletePropaganda(false);
         _isActive = false;
+        _towers.ForEach(t => t.gameObject.SetActive(false));
         /// TODO:   Play a sound
     }
 
@@ -107,12 +103,9 @@ public class RocketQTE : MonoBehaviour
 
     private bool _isActive = false;
     private float _timerTime = 3f;
-    private float _progressTime = 1f;
     private bool _complete = false;
 
-    [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Launch;
-    [SerializeField] private Transform _rocket = null;
-    [SerializeField] private ParticleSystem _smoke = null;
+    [SerializeField] private List<Tower> _towers = new List<Tower>();
 
     #endregion
 
@@ -125,29 +118,6 @@ public class RocketQTE : MonoBehaviour
     {
         GameManager.instance.OnProgressFullEvent -= CompleteEvent;
         GameManager.instance.OnTimerEmptyEvent -= FailEvent;
-    }
-
-    /// <summary>
-    /// Begins the launch QTE
-    /// </summary>
-    private void OnMouseDown()
-    {
-        if (!_isActive) return;
-        GameManager.instance.progressMod = (1 / _progressTime);
-    }
-
-    /// <summary>
-    /// If released too early
-    /// </summary>
-    private void OnMouseUp()
-    {
-        if (!_isActive) return;
-        if (!_complete)
-        {
-            GameManager.instance.timerMod = 5f;
-            GameManager.instance.progressMod = -5f;
-            FailEvent();
-        }
     }
 
     #endregion
