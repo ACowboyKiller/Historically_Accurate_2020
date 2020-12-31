@@ -80,6 +80,7 @@ public class RocketQTE : MonoBehaviour
             GameManager.playerCountry.CompleteTest(true);
         }
         _isActive = false;
+        GameManager.instance.EndQTE();
     }
 
     /// <summary>
@@ -98,6 +99,7 @@ public class RocketQTE : MonoBehaviour
         }
         _rocket.gameObject.SetActive(false);
         _isActive = false;
+        GameManager.instance.EndQTE();
         /// TODO:   Play a sound
     }
 

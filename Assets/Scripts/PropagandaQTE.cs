@@ -39,9 +39,6 @@ public class PropagandaQTE : MonoBehaviour
     /// </summary>
     public void Init()
     {
-        //  Reset
-        _complete = false;
-
         GameManager.instance.OnProgressFullEvent += CompleteEvent;
         GameManager.instance.OnTimerEmptyEvent += FailEvent;
 
@@ -78,11 +75,11 @@ public class PropagandaQTE : MonoBehaviour
     /// </summary>
     public void CompleteEvent()
     {
-        _complete = true;
         _Unsubscribe();
         GameManager.playerCountry.CompletePropaganda(true);
         _isActive = false;
         _towers.ForEach(t => t.gameObject.SetActive(false));
+        GameManager.instance.EndQTE();
     }
 
     /// <summary>
@@ -94,6 +91,7 @@ public class PropagandaQTE : MonoBehaviour
         GameManager.playerCountry.CompletePropaganda(false);
         _isActive = false;
         _towers.ForEach(t => t.gameObject.SetActive(false));
+        GameManager.instance.EndQTE();
         /// TODO:   Play a sound
     }
 
@@ -103,7 +101,6 @@ public class PropagandaQTE : MonoBehaviour
 
     private bool _isActive = false;
     private float _timerTime = 5f;
-    private bool _complete = false;
 
     [SerializeField] private List<Tower> _towers = new List<Tower>();
 

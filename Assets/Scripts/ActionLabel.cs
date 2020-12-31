@@ -18,6 +18,18 @@ public class ActionLabel : MonoBehaviour
     #region --------------------    Public Properties
 
     /// <summary>
+    /// The different game instructions
+    /// </summary>
+    public static Dictionary<GameAction, string> instructions = new Dictionary<GameAction, string>
+    {
+        { GameAction.Launch, "Click & hold the rocket" },
+        { GameAction.Test, "Click & hold the rocket" },
+        { GameAction.Report, "Rapidly click the flask" },
+        { GameAction.Experiment, "Rapidly click the flask" },
+        { GameAction.Propaganda, "Click each of the towers" }
+    };
+
+    /// <summary>
     /// Available Game Actions
     /// </summary>
     public Dictionary<GameAction, System.Action<bool>> instantActions = new Dictionary<GameAction, System.Action<bool>>() { };
@@ -52,6 +64,7 @@ public class ActionLabel : MonoBehaviour
         }
         else
         {
+            GameManager.instance.StartQTE(instructions[_gameAction]);
             qteActions[_gameAction]?.Invoke(false);
         }
     }

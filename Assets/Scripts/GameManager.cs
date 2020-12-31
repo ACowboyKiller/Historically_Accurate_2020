@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
@@ -88,21 +90,87 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public CanvasGroup gameplayBackground => _gameplayBackground;
 
+    /// <summary>
+    /// Returns the instructions text
+    /// </summary>
+    public TMP_Text instructionsText => _instructions;
+
     #endregion
 
     #region --------------------    Public Methods
 
     /// <summary>
+    /// Moves to setup
+    /// </summary>
+    public void MoveToSetup(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_pPrevious); _setup.DOFade(1f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_setup, true); }); state = GameState.Setup; });
+
+    /// <summary>
+    /// Resets the canvas group
+    /// </summary>
+    public void SetInteractable(CanvasGroup _pGroup, bool _pInteractable = false)
+    {
+        _pGroup.blocksRaycasts = _pInteractable;
+        _pGroup.interactable = _pInteractable;
+    }
+
+    /// <summary>
+    /// Moves to gameplay
+    /// </summary>
+    public void MoveToGameplay(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_pPrevious); _gampeplay.DOFade(1f, 0.5f).SetEase(Ease.OutQuad); state = GameState.Gameplay; });
+
+    /// <summary>
+    /// Moves to results
+    /// </summary>
+    public void MoveToResults(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_pPrevious); _results.DOFade(1f, 0.5f).SetEase(Ease.OutQuad); state = GameState.Results; });
+
+    /// <summary>
+    /// Moves to splash
+    /// </summary>
+    public void MoveToSplash(CanvasGroup _pPrevious)
+    {
+        _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => {
+            SetInteractable(_pPrevious);
+            _title.material.DOFade(1f, 0.5f);
+            _splash.DOFade(1f, 0.5f).SetEase(Ease.OutQuad); 
+            state = GameState.Splash; 
+        });
+    }
+
+    /// <summary>
     /// Selects the game language for gameplay
     /// </summary>
     /// <param name="_pCountry"></param>
-    public void SelectCountry(CountryName _pCountry) => _countries.Find(c => c.countryName == _pCountry).isPlayerControlled = true;
+    public void SelectCountry(CountryName _pCountry)
+    {
+        if (playerCountry != null) playerCountry.isPlayerControlled = false;
+        _countries.Find(c => c.countryName == _pCountry).isPlayerControlled = true;
+        _camTarget.position = playerCountry.transform.position;
+        DOTween.To(() => _virtualCam.m_Heading.m_Bias, x => _virtualCam.m_Heading.m_Bias = x, (_camTarget.position.x / 2f) * 90f, 2f);
+    }
 
     /// <summary>
     /// Sets the game's difficulty
     /// </summary>
     /// <param name="_pDifficulty"></param>
     public void SetDifficulty(GameDifficulty _pDifficulty) => difficulty = _pDifficulty;
+
+    /// <summary>
+    /// Removes the gameplay background to show the country better
+    /// </summary>
+    public void StartQTE(string _pInstructions)
+    {
+        _gameplayBackground.DOFade(0f, 0.25f);
+        _instructions.text = _pInstructions;
+    }
+
+    /// <summary>
+    /// Reset the gameplay background
+    /// </summary>
+    public void EndQTE()
+    {
+        _gameplayBackground.DOFade(1f, 0.25f);
+        _instructions.text = "Type the name of an action to be performed";
+    }
 
     public void LoseGame(Country _pCountry)
     {
@@ -119,9 +187,28 @@ public class GameManager : MonoBehaviour
     #region --------------------    Private Fields
 
     /// <summary>
+    /// The different canvas groups
+    /// </summary>
+    [SerializeField] private MeshRenderer _title = null;
+    [SerializeField] private CanvasGroup _splash = null;
+    [SerializeField] private CanvasGroup _setup = null;
+    [SerializeField] private CanvasGroup _gampeplay = null;
+    [SerializeField] private CanvasGroup _results = null;
+
+    /// <summary>
     /// The available countries in the game
     /// </summary>
     [SerializeField] private List<Country> _countries = new List<Country>();
+
+    /// <summary>
+    /// The target for the camera
+    /// </summary>
+    [SerializeField] private Transform _camTarget = null;
+
+    /// <summary>
+    /// The virtual camera for the scene
+    /// </summary>
+    [SerializeField] private Cinemachine.CinemachineOrbitalTransposer _virtualCam = null;
 
     /// <summary>
     /// The timer for the game's QTEs
@@ -137,6 +224,11 @@ public class GameManager : MonoBehaviour
     /// The canvas group for gameplay background
     /// </summary>
     [SerializeField] private CanvasGroup _gameplayBackground = null;
+
+    /// <summary>
+    /// The instructions text
+    /// </summary>
+    [SerializeField] private TMP_Text _instructions = null;
 
     #endregion
 
@@ -161,6 +253,13 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        /// Advances the state of the game from the splash screen
+        if (state == GameState.Splash && Input.GetKeyDown(KeyCode.Return))
+        {
+            _title.material.DOFade(0f, 0.5f);
+            MoveToSetup(_splash);
+        }
+
         /// Push the timer bar as needed
         timerBar.percent = timerBar.percent + (Time.deltaTime * timerMod);
         if (timerBar.percent <= 0f)

@@ -35,7 +35,6 @@ public class FlaskQTE : MonoBehaviour
     public void Init()
     {
         //  Reset
-        _complete = false;
         _flask.gameObject.SetActive(true);
         _chemicals.Clear();
 
@@ -68,7 +67,6 @@ public class FlaskQTE : MonoBehaviour
     /// </summary>
     public void CompleteEvent()
     {
-        _complete = true;
         _Unsubscribe();
         if (_action == ActionLabel.GameAction.Experiment)
         {
@@ -79,6 +77,7 @@ public class FlaskQTE : MonoBehaviour
             GameManager.playerCountry.CompleteReport(true);
         }
         _isActive = false;
+        GameManager.instance.EndQTE();
     }
 
     /// <summary>
@@ -97,6 +96,7 @@ public class FlaskQTE : MonoBehaviour
         }
         _flask.gameObject.SetActive(false);
         _isActive = false;
+        GameManager.instance.EndQTE();
         /// TODO:   Play a sound
     }
 
@@ -107,7 +107,6 @@ public class FlaskQTE : MonoBehaviour
     private bool _isActive = false;
     private float _timerTime = 8f;
     private float _clickCount = 0f;
-    private bool _complete = false;
 
     [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Experiment;
     [SerializeField] private Transform _flask = null;
