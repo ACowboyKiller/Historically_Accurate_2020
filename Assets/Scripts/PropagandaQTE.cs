@@ -102,7 +102,7 @@ public class PropagandaQTE : MonoBehaviour
     #region --------------------    Private Fields
 
     private bool _isActive = false;
-    private float _timerTime = 3f;
+    private float _timerTime = 5f;
     private bool _complete = false;
 
     [SerializeField] private List<Tower> _towers = new List<Tower>();

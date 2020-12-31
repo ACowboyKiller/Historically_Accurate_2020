@@ -47,7 +47,7 @@ public class FlaskQTE : MonoBehaviour
         GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
 
         //  Determine click count
-        _clickCount = Random.Range(2f, 6f);
+        _clickCount = Random.Range(6f, 10f);
     }
 
     /// <summary>
@@ -105,7 +105,7 @@ public class FlaskQTE : MonoBehaviour
     #region --------------------    Private Fields
 
     private bool _isActive = false;
-    private float _timerTime = 3f;
+    private float _timerTime = 8f;
     private float _clickCount = 0f;
     private bool _complete = false;
 
