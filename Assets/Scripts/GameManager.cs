@@ -156,6 +156,15 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public List<Image> levelIcons => _levelIcons;
 
+    /// <summary>
+    /// Returns the respective result label
+    /// </summary>
+    public TMP_Text experimentResultLabel => _experiementResultLabel;
+    public TMP_Text propagandaResultLabel => _propagandaResultLabel;
+    public TMP_Text reportResultLabel => _reportResultLabel;
+    public TMP_Text testResultLabel => _testResultLabel;
+    public TMP_Text launchResultLabel => _launchResultLabel;
+
 
     #endregion
 
@@ -385,6 +394,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text _researchlbl = null;
     [SerializeField] private Image _researchBack = null;
     [SerializeField] private TMP_Text _researchValuelbl = null;
+
+    [SerializeField] private TMP_Text _experiementResultLabel = null;
+    [SerializeField] private TMP_Text _propagandaResultLabel = null;
+    [SerializeField] private TMP_Text _reportResultLabel = null;
+    [SerializeField] private TMP_Text _testResultLabel = null;
+    [SerializeField] private TMP_Text _launchResultLabel = null;
 
     /// <summary>
     /// The button used to buy more work force tokens

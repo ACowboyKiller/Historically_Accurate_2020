@@ -375,6 +375,11 @@ public class Country : MonoBehaviour
         GameManager.instance.fundingStreamlabel.text = $"<sprite name={(_fundingStream > 0 ? "Up" : "Down")}> {_fundingStream}";
         GameManager.instance.researchLabel.text = _researchPoints.ToString();
         GameManager.instance.reserachValueLabel.text = $"<sprite name=ResearchValue> {_researchValue}";
+        
+        GameManager.instance.experimentResultLabel.text = $"<sprite name=Funding><color=red> {fundingCosts[countryName][_level] / 10}" +
+            $"</color>   <sprite name=FundingStream><color=green> (S)2</color>   <sprite name=Research><color=green> (S){(_researchValue * 2) * (3 - (int)GameManager.difficulty)}" +
+            $" (F){_researchValue}" +
+            $"</color>   <sprite name=ResearchValue><color=red> (F)1</color>";
     }
 
     /// <summary>
