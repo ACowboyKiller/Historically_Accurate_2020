@@ -35,7 +35,6 @@ public class CustomProgressBar : MonoBehaviour
 		{
 			return;
 		}
-		_image.enabled = !_isHiddenWhenFull || (percent < 1f);
 		_fillImage.enabled = _image.enabled;
 		_fillImage.rectTransform.SetParent(_image.rectTransform);
 		_fillImage.rectTransform.anchoredPosition = Vector2.zero + ((_flipHorizontal) ? Vector2.right : Vector2.zero);

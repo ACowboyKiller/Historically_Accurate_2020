@@ -140,7 +140,7 @@ public class Country : MonoBehaviour
         {
             _launchQTE.RocketAnim();
             _level++;
-            if (_level >= 11) GameManager.instance.WinGame(this);
+            if (_level > 9) GameManager.instance.WinGame(this);
             _nationalPride += 150;
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.prideBack, Color.green);
             //_prideStream = _prideStream;
@@ -152,7 +152,7 @@ public class Country : MonoBehaviour
             {
                 DOTween.To(() => GameManager.instance.launchProgress.percent,
                     x => GameManager.instance.launchProgress.percent = x,
-                    GameManager.instance.launchProgress.percent + (1f / 11f), 0.5f)
+                    GameManager.instance.launchProgress.percent + (1f / 10f), 0.5f)
                     .SetEase(Ease.OutQuad)
                     .OnComplete(() => { GameManager.instance.levelIcons[_level - 1].color = GameManager.instance.launchProgress.effectColor; });
             }
@@ -199,7 +199,7 @@ public class Country : MonoBehaviour
             {
                 DOTween.To(() => GameManager.instance.testProgress.percent,
                     x => GameManager.instance.testProgress.percent = x,
-                    GameManager.instance.testProgress.percent + (1f / 11f), 0.5f)
+                    GameManager.instance.testProgress.percent + (1f / 10f), 0.5f)
                     .SetEase(Ease.OutQuad)
                     .OnComplete(() => { GameManager.instance.levelIcons[_testLevel - 1].color = GameManager.instance.testProgress.effectColor; });
             }

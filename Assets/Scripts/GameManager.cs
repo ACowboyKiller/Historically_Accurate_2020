@@ -301,11 +301,6 @@ public class GameManager : MonoBehaviour
         _buyTokensButton.text = (playerCountry.workforceTokens < 3) ? $"<sprite name=Funding> { playerCountry.tokenCost }" : "<color=green>Full</color>";
     }
 
-    public void UpdateLevelIcons()
-    {
-
-    }
-
     public void LoseGame(Country _pCountry)
     {
         Debug.Log("Game Lost");
