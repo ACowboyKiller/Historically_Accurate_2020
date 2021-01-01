@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -212,6 +213,36 @@ public class GameManager : MonoBehaviour
         MoveToGameplay(_setup);
     }
 
+    public void BuyToken()
+    {
+        if (playerCountry.BuyWorkForceToken())
+        {
+
+        }
+        else
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// Flashes the background of a stat label
+    /// </summary>
+    /// <param name="_pBack"></param>
+    /// <param name="_pColor"></param>
+    public void FlashStatLabelBack(Image _pBack, Color _pColor) => _pBack.DOColor(_pColor, 0.25f).OnComplete(() => { _pBack.color = new Color(0.22f, 0.22f, 0.22f); });
+
+    /// <summary>
+    /// Updates the visibility of the work tokens
+    /// </summary>
+    public void UpdateTokens()
+    {
+        for (int i = 0; i < _workTokens.Count; i ++)
+        {
+            _workTokens[i].gameObject.SetActive(i + 1 <= playerCountry.workforceTokens);
+        }
+    }
+
     public void LoseGame(Country _pCountry)
     {
 
@@ -284,6 +315,34 @@ public class GameManager : MonoBehaviour
     /// The instructions text
     /// </summary>
     [SerializeField] private TMP_Text _instructions = null;
+
+
+    [SerializeField] private Sprite _upSprite = null;
+    [SerializeField] private Sprite _downSprite = null;
+
+    [SerializeField] private TMP_Text _pridelbl = null;
+    [SerializeField] private Image _prideBack = null;
+    [SerializeField] private Image _prideStreamImg = null;
+    [SerializeField] private TMP_Text _prideStreamlbl = null;
+
+    [SerializeField] private TMP_Text _fundinglbl = null;
+    [SerializeField] private Image _fundingBack = null;
+    [SerializeField] private Image _fundingStreamImg = null;
+    [SerializeField] private TMP_Text _fundingStreamlbl = null;
+
+    [SerializeField] private TMP_Text _researchlbl = null;
+    [SerializeField] private Image _researchBack = null;
+    [SerializeField] private TMP_Text _researchValuelbl = null;
+
+    /// <summary>
+    /// The button used to buy more work force tokens
+    /// </summary>
+    [SerializeField] private TMP_Text _buyTokensButton = null;
+
+    /// <summary>
+    /// The list of token images
+    /// </summary>
+    [SerializeField] private List<Image> _workTokens = new List<Image>();
 
     #endregion
 
