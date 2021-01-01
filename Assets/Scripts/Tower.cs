@@ -34,6 +34,7 @@ public class Tower : MonoBehaviour
 
     [SerializeField] private PropagandaQTE _qte = null;
     [SerializeField] private ParticleSystem _sparks = null;
+    private bool _isClickable = false;
 
     #endregion
 
@@ -42,6 +43,7 @@ public class Tower : MonoBehaviour
     private void OnEnable()
     {
         _sparks.Clear();
+        _isClickable = true;
     }
 
     /// <summary>
@@ -49,12 +51,13 @@ public class Tower : MonoBehaviour
     /// </summary>
     private void OnMouseDown()
     {
-        if (!_qte.isActive) return;
+        if (!_qte.isActive || !_isClickable) return;
+        _isClickable = false;
         _sparks.Play();
+        GameManager.instance.progressBar.percent += (1f / _qte.towerCount);
         transform.DOLocalMoveY(0f, 1f)
             .OnComplete(() => { 
                 gameObject.SetActive(false); 
-                GameManager.instance.progressBar.percent += (1f / _qte.towerCount); 
             });
     }
 

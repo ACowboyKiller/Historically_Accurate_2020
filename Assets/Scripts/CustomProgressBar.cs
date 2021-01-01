@@ -4,12 +4,14 @@ using UnityEngine.UI;
 [ExecuteInEditMode]
 public class CustomProgressBar : MonoBehaviour
 {
-	[SerializeField] private Color effectColor, coolDownColor;
+	[SerializeField] private Color _effectColor, coolDownColor;
 
 
 	#region --------------------	Public Properties
 
 	public float percent { get { return _percent; } set { _percent = Mathf.Clamp01(value); gameObject.SetActive(_percent > 0f); } }
+
+	public Color effectColor => _effectColor;
 
 	#endregion
 

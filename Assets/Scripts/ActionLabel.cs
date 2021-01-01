@@ -63,14 +63,22 @@ public class ActionLabel : MonoBehaviour
     /// </summary>
     public void Invoke()
     {
-        if (GameManager.playerCountry.HasFunding(_gameAction))
+        Country _player = GameManager.playerCountry;
+        if (_player.HasFunding(_gameAction))
         {
-            if ((_gameAction == GameAction.Launch || _gameAction == GameAction.Test) && !GameManager.playerCountry.HasResearchPoints())
+            if (_gameAction == GameAction.Launch && !_player.HasTestedLevel())
             {
-                //  TODO:   Unable to perform action.  Play sound / do UI animation
+                GameManager.instance.FlashStatLabelBack(GameManager.instance.levelProgBack, Color.red);
                 return;
             }
-            if (GameManager.playerCountry.UseWorkForceToken())
+            if ((_gameAction == GameAction.Launch && !_player.HasLaunchResearchPoints()) ||
+                (_gameAction == GameAction.Test && !_player.HasTestResearchPoints()))
+            {
+                //  TODO:   Unable to perform action.  Play sound / do UI animation
+                GameManager.instance.FlashStatLabelBack(GameManager.instance.researchBack, Color.red);
+                return;
+            }
+            if (_player.UseWorkForceToken())
             {
                 instantActions[_gameAction]?.Invoke(true);
             }
@@ -79,6 +87,10 @@ public class ActionLabel : MonoBehaviour
                 GameManager.instance.StartQTE(instructions[_gameAction]);
                 qteActions[_gameAction]?.Invoke(false);
             }
+        }
+        else
+        {
+            GameManager.instance.FlashStatLabelBack(GameManager.instance.fundingBack, Color.red);
         }
     }
 

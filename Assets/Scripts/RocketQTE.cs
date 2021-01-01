@@ -46,10 +46,10 @@ public class RocketQTE : MonoBehaviour
 
         //  Begins countdown
         _isActive = true;
-        GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
 
         //  Set progress time
-        _progressTime = Random.Range(0.25f, 1.5f);
+        _progressTime = Random.Range(2f, 3f);
+        GameManager.instance.timerMod = (-1 / (_timerTime * _progressTime)) / (3 - (int)GameManager.difficulty);
     }
 
     /// <summary>

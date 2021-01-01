@@ -45,6 +45,11 @@ public class GameManager : MonoBehaviour
     public static GameDifficulty difficulty { get; private set; } = GameDifficulty.Easy;
 
     /// <summary>
+    /// Stores whether or not a country has been selected
+    /// </summary>
+    public bool isCountrySelected { get; set; } = false;
+
+    /// <summary>
     /// Returns the player's country of the game
     /// </summary>
     public static Country playerCountry => instance._countries.Find(c => c.isPlayerControlled);
@@ -92,9 +97,65 @@ public class GameManager : MonoBehaviour
     public CanvasGroup gameplayBackground => _gameplayBackground;
 
     /// <summary>
+    /// Returns the pride back image
+    /// </summary>
+    public Image prideBack => _prideBack;
+
+    /// <summary>
+    /// Returns the funding back image
+    /// </summary>
+    public Image fundingBack => _fundingBack;
+
+    /// <summary>
+    /// Returns the research back image
+    /// </summary>
+    public Image researchBack => _researchBack;
+
+    /// <summary>
     /// Returns the instructions text
     /// </summary>
     public TMP_Text instructionsText => _instructions;
+
+    /// <summary>
+    /// Returns the use token particles
+    /// </summary>
+    public ParticleSystem useTokenParticles => _useTokenParticles;
+
+    /// <summary>
+    /// Returns the gain token particles
+    /// </summary>
+    public ParticleSystem gainTokenParticles => _gainTokenParticles;
+
+    /// <summary>
+    /// Returns the resepective label
+    /// </summary>
+    public TMP_Text prideLabel => _pridelbl;
+    public TMP_Text prideStreamLabel => _prideStreamlbl;
+    public TMP_Text fundingLabel => _fundinglbl;
+    public TMP_Text fundingStreamlabel => _fundingStreamlbl;
+    public TMP_Text researchLabel => _researchlbl;
+    public TMP_Text reserachValueLabel => _researchValuelbl;
+
+    /// <summary>
+    /// Returns the background image for the level progress bar
+    /// </summary>
+    public Image levelProgBack => _levelProgBack;
+
+    /// <summary>
+    /// Returns the custom progressbar for the launch progress
+    /// </summary>
+    public CustomProgressBar launchProgress => _launchProgress;
+
+    /// <summary>
+    /// Returns the custom progressbar for the test progress
+    /// </summary>
+    public CustomProgressBar testProgress => _testProgress;
+
+    /// <summary>
+    /// Level icons for the ui
+    /// </summary>
+    public List<Image> levelIcons => _levelIcons;
+
 
     #endregion
 
@@ -136,8 +197,9 @@ public class GameManager : MonoBehaviour
                 .OnComplete(() => { 
                     SetInteractable(_gameplay, true); 
                     _textInput.textInput.Select(); 
-                }); 
+                });
             state = GameState.Gameplay; 
+            playerCountry.Initialize();
         });
 
     /// <summary>
@@ -173,6 +235,7 @@ public class GameManager : MonoBehaviour
     /// <param name="_pCountry"></param>
     public void SelectCountry(int _pCountry)
     {
+        isCountrySelected = true;
         if (playerCountry != null) playerCountry.isPlayerControlled = false;
         _countries.Find(c => c.countryName == (CountryName)_pCountry).isPlayerControlled = true;
         _labels.ForEach(l => l.Setup());
@@ -210,19 +273,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
+        if (!isCountrySelected) return;
         MoveToGameplay(_setup);
-    }
-
-    public void BuyToken()
-    {
-        if (playerCountry.BuyWorkForceToken())
-        {
-
-        }
-        else
-        {
-
-        }
     }
 
     /// <summary>
@@ -233,6 +285,11 @@ public class GameManager : MonoBehaviour
     public void FlashStatLabelBack(Image _pBack, Color _pColor) => _pBack.DOColor(_pColor, 0.25f).OnComplete(() => { _pBack.color = new Color(0.22f, 0.22f, 0.22f); });
 
     /// <summary>
+    /// Attempts to buy a workforce token
+    /// </summary>
+    public void BuyToken() => playerCountry.BuyWorkForceToken();
+
+    /// <summary>
     /// Updates the visibility of the work tokens
     /// </summary>
     public void UpdateTokens()
@@ -241,16 +298,22 @@ public class GameManager : MonoBehaviour
         {
             _workTokens[i].gameObject.SetActive(i + 1 <= playerCountry.workforceTokens);
         }
+        _buyTokensButton.text = (playerCountry.workforceTokens < 3) ? $"<sprite name=Funding> { playerCountry.tokenCost }" : "<color=green>Full</color>";
+    }
+
+    public void UpdateLevelIcons()
+    {
+
     }
 
     public void LoseGame(Country _pCountry)
     {
-
+        Debug.Log("Game Lost");
     }
 
     public void WinGame(Country _pCountry)
     {
-
+        Debug.Log("Game Won");
     }
 
     #endregion
@@ -316,18 +379,12 @@ public class GameManager : MonoBehaviour
     /// </summary>
     [SerializeField] private TMP_Text _instructions = null;
 
-
-    [SerializeField] private Sprite _upSprite = null;
-    [SerializeField] private Sprite _downSprite = null;
-
     [SerializeField] private TMP_Text _pridelbl = null;
     [SerializeField] private Image _prideBack = null;
-    [SerializeField] private Image _prideStreamImg = null;
     [SerializeField] private TMP_Text _prideStreamlbl = null;
 
     [SerializeField] private TMP_Text _fundinglbl = null;
     [SerializeField] private Image _fundingBack = null;
-    [SerializeField] private Image _fundingStreamImg = null;
     [SerializeField] private TMP_Text _fundingStreamlbl = null;
 
     [SerializeField] private TMP_Text _researchlbl = null;
@@ -343,6 +400,36 @@ public class GameManager : MonoBehaviour
     /// The list of token images
     /// </summary>
     [SerializeField] private List<Image> _workTokens = new List<Image>();
+
+    /// <summary>
+    /// The particle system for when a token is used
+    /// </summary>
+    [SerializeField] private ParticleSystem _useTokenParticles = null;
+
+    /// <summary>
+    /// The particle system for when a token is gained
+    /// </summary>
+    [SerializeField] private ParticleSystem _gainTokenParticles = null;
+
+    /// <summary>
+    /// The background image for the launch level bar
+    /// </summary>
+    [SerializeField] private Image _levelProgBack = null;
+
+    /// <summary>
+    /// The custom progress bar for the public test level
+    /// </summary>
+    [SerializeField] private CustomProgressBar _testProgress = null;
+
+    /// <summary>
+    /// The custom progress bar for the public test level
+    /// </summary>
+    [SerializeField] private CustomProgressBar _launchProgress = null;
+
+    /// <summary>
+    /// The list of icons for the levels for the UI
+    /// </summary>
+    [SerializeField] private List<Image> _levelIcons = new List<Image>();
 
     #endregion
 

@@ -44,8 +44,6 @@ public class PropagandaQTE : MonoBehaviour
 
         //  Begins countdown
         _isActive = true;
-        GameManager.instance.progressMod = 0f;
-        GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
 
         //  Set progress time
         towerCount = Random.Range(2, _towers.Count);
@@ -60,6 +58,8 @@ public class PropagandaQTE : MonoBehaviour
             }
             _towers[_index].gameObject.SetActive(true);
         }
+        GameManager.instance.progressMod = 0f;
+        GameManager.instance.timerMod = (-1 / (_timerTime * towerCount)) / (3 - (int)GameManager.difficulty);
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class PropagandaQTE : MonoBehaviour
     /// </summary>
     public void DoneAnim()
     {
-        _towers.ForEach(t => t.gameObject.SetActive(isActive));
+        //_towers.ForEach(t => t.gameObject.SetActive(isActive));
         /// TODO:   Play a sound
     }
 
@@ -79,7 +79,6 @@ public class PropagandaQTE : MonoBehaviour
         _Unsubscribe();
         GameManager.playerCountry.CompletePropaganda(true);
         _isActive = false;
-        _towers.ForEach(t => t.gameObject.SetActive(false));
         GameManager.instance.EndQTE();
     }
 
@@ -101,7 +100,7 @@ public class PropagandaQTE : MonoBehaviour
     #region --------------------    Private Fields
 
     private bool _isActive = false;
-    private float _timerTime = 5f;
+    private float _timerTime = 1f;
 
     [SerializeField] private List<Tower> _towers = new List<Tower>();
 

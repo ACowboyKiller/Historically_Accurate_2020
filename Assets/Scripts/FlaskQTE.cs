@@ -45,10 +45,10 @@ public class FlaskQTE : MonoBehaviour
         //  Begins countdown
         _isActive = true;
         GameManager.instance.progressMod = 0f;
-        GameManager.instance.timerMod = (-1 / _timerTime) / (3 - (int)GameManager.difficulty);
 
         //  Determine click count
-        _clickCount = Random.Range(6f, 10f);
+        _clickCount = Random.Range(10f, 20f);
+        GameManager.instance.timerMod = (-1 / (_timerTime * _clickCount)) / (3 - (int)GameManager.difficulty);
     }
 
     /// <summary>
@@ -72,6 +72,7 @@ public class FlaskQTE : MonoBehaviour
     public void CompleteEvent()
     {
         _Unsubscribe();
+        _isActive = false;
         if (_action == ActionLabel.GameAction.Experiment)
         {
             GameManager.playerCountry.CompleteExperiment(true);
@@ -80,7 +81,6 @@ public class FlaskQTE : MonoBehaviour
         {
             GameManager.playerCountry.CompleteReport(true);
         }
-        _isActive = false;
         GameManager.instance.EndQTE();
     }
 
@@ -90,6 +90,7 @@ public class FlaskQTE : MonoBehaviour
     public void FailEvent()
     {
         _Unsubscribe();
+        _isActive = false;
         if (_action == ActionLabel.GameAction.Experiment)
         {
             GameManager.playerCountry.CompleteExperiment(false);
@@ -99,7 +100,6 @@ public class FlaskQTE : MonoBehaviour
             GameManager.playerCountry.CompleteReport(false);
         }
         _flask.gameObject.SetActive(false);
-        _isActive = false;
         GameManager.instance.EndQTE();
         /// TODO:   Play a sound
     }
@@ -109,7 +109,7 @@ public class FlaskQTE : MonoBehaviour
     #region --------------------    Private Fields
 
     private bool _isActive = false;
-    private float _timerTime = 8f;
+    private float _timerTime = 0.25f;
     private float _clickCount = 0f;
 
     [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Experiment;
