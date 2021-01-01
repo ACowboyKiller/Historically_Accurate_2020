@@ -67,7 +67,7 @@ public class PropagandaQTE : MonoBehaviour
     /// </summary>
     public void DoneAnim()
     {
-        _towers.ForEach(t => t.gameObject.SetActive(false));
+        _towers.ForEach(t => t.gameObject.SetActive(isActive));
         /// TODO:   Play a sound
     }
 

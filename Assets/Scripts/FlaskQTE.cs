@@ -35,6 +35,7 @@ public class FlaskQTE : MonoBehaviour
     public void Init()
     {
         //  Reset
+        _flaskTween?.Pause();
         _flask.gameObject.SetActive(true);
         _chemicals.Clear();
 
@@ -56,10 +57,12 @@ public class FlaskQTE : MonoBehaviour
     public void FlaskAnim()
     {
         /// TODO:   Play a sound
+        _flaskTween?.Pause();
         _flask.gameObject.SetActive(true);
         _flask.localPosition = Vector3.zero;
         _chemicals.Clear();
-        _flask.DOLocalMoveY(0f, 3f).OnComplete(() => { _flask.gameObject.SetActive(false); });
+        _flaskTween = _flask.DOLocalMoveY(0f, 3f)
+            .OnComplete(() => { _flask.gameObject.SetActive(_isActive); });
         _chemicals.Play();
     }
 
@@ -112,6 +115,8 @@ public class FlaskQTE : MonoBehaviour
     [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Experiment;
     [SerializeField] private Transform _flask = null;
     [SerializeField] private ParticleSystem _chemicals = null;
+
+    private DG.Tweening.Core.TweenerCore<Vector3, Vector3, DG.Tweening.Plugins.Options.VectorOptions> _flaskTween = null;
 
     #endregion
 

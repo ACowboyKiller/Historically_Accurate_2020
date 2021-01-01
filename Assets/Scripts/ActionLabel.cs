@@ -63,14 +63,22 @@ public class ActionLabel : MonoBehaviour
     /// </summary>
     public void Invoke()
     {
-        if (GameManager.playerCountry.UseWorkForceToken())
+        if (GameManager.playerCountry.HasFunding(_gameAction))
         {
-            instantActions[_gameAction]?.Invoke(true);
-        }
-        else
-        {
-            GameManager.instance.StartQTE(instructions[_gameAction]);
-            qteActions[_gameAction]?.Invoke(false);
+            if ((_gameAction == GameAction.Launch || _gameAction == GameAction.Test) && !GameManager.playerCountry.HasResearchPoints())
+            {
+                //  TODO:   Unable to perform action.  Play sound / do UI animation
+                return;
+            }
+            if (GameManager.playerCountry.UseWorkForceToken())
+            {
+                instantActions[_gameAction]?.Invoke(true);
+            }
+            else
+            {
+                GameManager.instance.StartQTE(instructions[_gameAction]);
+                qteActions[_gameAction]?.Invoke(false);
+            }
         }
     }
 

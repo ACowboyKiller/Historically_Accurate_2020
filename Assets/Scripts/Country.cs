@@ -83,6 +83,30 @@ public class Country : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns whether or not the country has funding points for an action
+    /// </summary>
+    /// <param name="_pAction"></param>
+    /// <returns></returns>
+    public bool HasFunding(ActionLabel.GameAction _pAction)
+    {
+        switch (_pAction)
+        {
+            case ActionLabel.GameAction.Experiment: return _fundingPoints >= fundingCosts[countryName][_level] / 10;
+            case ActionLabel.GameAction.Propaganda: return _fundingPoints >= fundingCosts[countryName][_level] / 4;
+            case ActionLabel.GameAction.Report: return true;
+            case ActionLabel.GameAction.Test: return _fundingPoints >= fundingCosts[countryName][_level] / 2;
+            case ActionLabel.GameAction.Launch: return _fundingPoints >= fundingCosts[countryName][_level];
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Returns whether or not the country has the research points required to launch / test
+    /// </summary>
+    /// <returns></returns>
+    public bool HasResearchPoints() => _researchPoints >= _level * 100;
+
+    /// <summary>
     /// Performs some animation whenever a launch is completed
     /// </summary>
     public void CompleteLaunch(bool _pSuccess = false)
@@ -129,7 +153,7 @@ public class Country : MonoBehaviour
             _nationalPride += 50;
             _prideStream = 5;
             DOTween.To(() => _prideStream, x => _prideStream = x, -5, 3f);
-            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingPoints -= fundingCosts[countryName][_level] / 2;
             _fundingStream += 5;
             _researchPoints += _researchValue * 5;
             //_researchValue = _researchValue;
@@ -140,7 +164,7 @@ public class Country : MonoBehaviour
             //_nationalPride -= 100;
             _prideStream = -7;
             DOTween.To(() => _prideStream, x => _prideStream = x, -5, 3f);
-            _fundingPoints -= fundingCosts[countryName][_level];
+            _fundingPoints -= fundingCosts[countryName][_level] / 2;
             //_fundingStream = Mathf.Max(_fundingStream - 3, 0);
             //_researchPoints = _researchPoints;
             //_researchValue = _researchValue;
@@ -299,7 +323,8 @@ public class Country : MonoBehaviour
 
         //  Configure timer
         _prideTimer = 0f;
-        DOTween.To(() => _prideTimer, x => _prideTimer = x, 1f, 1f).OnComplete(_StreamPride);
+        DOTween.To(() => _prideTimer, x => _prideTimer = x, 1f, 1f)
+            .OnComplete(_StreamPride);
 
         //  Perform Stream
         _nationalPride = Mathf.Max(_prideStream + _nationalPride, 0);
@@ -319,7 +344,8 @@ public class Country : MonoBehaviour
 
         //  Configure timer
         _fundingTimer = 0f;
-        DOTween.To(() => _fundingTimer, x => _fundingTimer = x, 1f, 1f).OnComplete(_StreamFunding);
+        DOTween.To(() => _fundingTimer, x => _fundingTimer = x, 1f, 1f)
+            .OnComplete(_StreamFunding);
 
         //  Perform stream
         _fundingPoints = Mathf.Max(_fundingPoints + _fundingStream, 0);

@@ -71,6 +71,14 @@ public class GameTextInput : MonoBehaviour
     private void Start() => _textInput.Select();
 
     /// <summary>
+    /// Focuses on the text input
+    /// </summary>
+    private void Update()
+    {
+        if (GameManager.state == GameManager.GameState.Gameplay && !textInput.isFocused) textInput.Select();
+    }
+
+    /// <summary>
     /// Restricts the value of the text box to base values for the labels listed
     /// </summary>
     /// <param name="_pValue"></param>

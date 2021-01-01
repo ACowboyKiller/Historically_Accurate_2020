@@ -102,7 +102,17 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Moves to setup
     /// </summary>
-    public void MoveToSetup(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_pPrevious); _setup.DOFade(1f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_setup, true); }); state = GameState.Setup; });
+    public void MoveToSetup(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f)
+        .SetEase(Ease.OutQuad)
+        .OnComplete(() => { 
+            SetInteractable(_pPrevious); 
+            _setup.DOFade(1f, 0.5f)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() => {
+                    SetInteractable(_setup, true); 
+                }); 
+            state = GameState.Setup; 
+        });
 
     /// <summary>
     /// Resets the canvas group
@@ -116,24 +126,44 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Moves to gameplay
     /// </summary>
-    public void MoveToGameplay(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_pPrevious); _gameplay.DOFade(1f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_gameplay, true); _textInput.textInput.Select(); }); state = GameState.Gameplay; });
+    public void MoveToGameplay(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f)
+        .SetEase(Ease.OutQuad)
+        .OnComplete(() => { 
+            SetInteractable(_pPrevious); 
+            _gameplay.DOFade(1f, 0.5f)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() => { 
+                    SetInteractable(_gameplay, true); 
+                    _textInput.textInput.Select(); 
+                }); 
+            state = GameState.Gameplay; 
+        });
 
     /// <summary>
     /// Moves to results
     /// </summary>
-    public void MoveToResults(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => { SetInteractable(_pPrevious); _results.DOFade(1f, 0.5f).SetEase(Ease.OutQuad); state = GameState.Results; });
+    public void MoveToResults(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f)
+        .SetEase(Ease.OutQuad)
+        .OnComplete(() => { 
+            SetInteractable(_pPrevious); 
+            _results.DOFade(1f, 0.5f)
+                .SetEase(Ease.OutQuad);
+            state = GameState.Results;
+        });
 
     /// <summary>
     /// Moves to splash
     /// </summary>
     public void MoveToSplash(CanvasGroup _pPrevious)
     {
-        _pPrevious.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() => {
-            SetInteractable(_pPrevious);
-            _title.material.DOFade(1f, 0.5f);
-            _splash.DOFade(1f, 0.5f).SetEase(Ease.OutQuad); 
-            state = GameState.Splash; 
-        });
+        _pPrevious.DOFade(0f, 0.5f)
+            .SetEase(Ease.OutQuad)
+            .OnComplete(() => {
+                SetInteractable(_pPrevious);
+                _title.material.DOFade(1f, 0.5f);
+                _splash.DOFade(1f, 0.5f).SetEase(Ease.OutQuad); 
+                state = GameState.Splash; 
+            });
     }
 
     /// <summary>
@@ -171,6 +201,7 @@ public class GameManager : MonoBehaviour
     {
         _gameplayBackground.DOFade(1f, 0.25f);
         _instructions.text = "Type the name of an action to be performed";
+        _textInput.textInput.Select();
     }
 
     /// <summary>

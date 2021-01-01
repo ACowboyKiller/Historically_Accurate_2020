@@ -19,6 +19,16 @@ public class LockedInputField : InputField
 
     #endregion
 
+    #region --------------------    Protected Methods
+
+    /// <summary>
+    /// Prevents copy/paste
+    /// </summary>
+    /// <param name="input"></param>
+    protected override void Append(string input) { }
+
+    #endregion
+
     #region --------------------    Private Methods
 
     private new void Awake()

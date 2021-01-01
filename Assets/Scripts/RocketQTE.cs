@@ -36,6 +36,7 @@ public class RocketQTE : MonoBehaviour
     {
         //  Reset
         _complete = false;
+        _rocketTween?.Pause();
         _rocket.gameObject.SetActive(true);
         _rocket.localPosition = Vector3.zero;
         _smoke.Clear();
@@ -57,10 +58,13 @@ public class RocketQTE : MonoBehaviour
     public void RocketAnim()
     {
         /// TODO:   Play a sound
+        _rocketTween?.Pause();
         _rocket.gameObject.SetActive(true);
         _rocket.localPosition = Vector3.zero;
         _smoke.Clear();
-        _rocket.DOLocalMoveY(0.002f, 3f).SetEase(Ease.InQuad).OnComplete(() => { rocket.gameObject.SetActive(false); });
+        _rocketTween = _rocket.DOLocalMoveY(0.002f, 3f)
+            .SetEase(Ease.InQuad)
+            .OnComplete(() => { rocket.gameObject.SetActive(_isActive); });
         _smoke.Play();
     }
 
@@ -71,6 +75,7 @@ public class RocketQTE : MonoBehaviour
     {
         _complete = true;
         _Unsubscribe();
+        _isActive = false;
         if (_action == ActionLabel.GameAction.Launch)
         {
             GameManager.playerCountry.CompleteLaunch(true);
@@ -79,7 +84,6 @@ public class RocketQTE : MonoBehaviour
         {
             GameManager.playerCountry.CompleteTest(true);
         }
-        _isActive = false;
         GameManager.instance.EndQTE();
     }
 
@@ -89,6 +93,7 @@ public class RocketQTE : MonoBehaviour
     public void FailEvent()
     {
         _Unsubscribe();
+        _isActive = false;
         if (_action == ActionLabel.GameAction.Launch)
         {
             GameManager.playerCountry.CompleteLaunch(false);
@@ -98,7 +103,6 @@ public class RocketQTE : MonoBehaviour
             GameManager.playerCountry.CompleteTest(false);
         }
         _rocket.gameObject.SetActive(false);
-        _isActive = false;
         GameManager.instance.EndQTE();
         /// TODO:   Play a sound
     }
@@ -115,6 +119,8 @@ public class RocketQTE : MonoBehaviour
     [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Launch;
     [SerializeField] private Transform _rocket = null;
     [SerializeField] private ParticleSystem _smoke = null;
+
+    private DG.Tweening.Core.TweenerCore<Vector3, Vector3, DG.Tweening.Plugins.Options.VectorOptions> _rocketTween = null;
 
     #endregion
 
