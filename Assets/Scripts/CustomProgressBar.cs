@@ -9,7 +9,7 @@ public class CustomProgressBar : MonoBehaviour
 
 	#region --------------------	Public Properties
 
-	public float percent { get { return _percent; } set { _percent = Mathf.Clamp01(value); gameObject.SetActive(_percent > 0f); } }
+	public float percent { get { return _percent; } set { _percent = Mathf.Clamp01(value); } }
 
 	public Color effectColor => _effectColor;
 

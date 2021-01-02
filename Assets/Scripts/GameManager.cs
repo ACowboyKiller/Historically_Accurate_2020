@@ -248,7 +248,8 @@ public class GameManager : MonoBehaviour
     public void MoveToResults(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f)
         .SetEase(Ease.OutQuad)
         .OnComplete(() => { 
-            SetInteractable(_pPrevious); 
+            SetInteractable(_pPrevious);
+            SetInteractable(_results, true);
             _results.DOFade(1f, 0.5f)
                 .SetEase(Ease.OutQuad);
             state = GameState.Results;
@@ -280,7 +281,8 @@ public class GameManager : MonoBehaviour
         _countries.Find(c => c.countryName == (CountryName)_pCountry).isPlayerControlled = true;
         _labels.ForEach(l => l.Setup());
         _camTarget.DOMove(playerCountry.transform.position, 2f);
-        DOTween.To(() => _transposer.m_Heading.m_Bias, x => _transposer.m_Heading.m_Bias = x, (_camTarget.position.x / -2f) * 90f, 2f);
+        float _countryX = playerCountry.transform.position.x;
+        DOTween.To(() => _transposer.m_Heading.m_Bias, x => _transposer.m_Heading.m_Bias = x, (_countryX / -2f) * 90f, 2f);
     }
 
     /// <summary>

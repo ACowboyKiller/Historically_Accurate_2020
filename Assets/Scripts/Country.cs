@@ -212,8 +212,9 @@ public class Country : MonoBehaviour
             _testLevel++;
             _nationalPride += 50;
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.prideBack, Color.green);
+            _prideStreamTween.Pause();
             _prideStream = 5;
-            DOTween.To(() => _prideStream, x => _prideStream = x, -5, 5f);
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, -5, 5f);
             _fundingPoints -= _testLevel * 100 / 2;
             //_fundingStream += 1;
             _researchPoints += _researchValue / 2;
@@ -232,8 +233,9 @@ public class Country : MonoBehaviour
         {
             /// TODO:   Play some animation
             //_nationalPride -= 100;
+            _prideStreamTween.Pause();
             _prideStream = -7;
-            DOTween.To(() => _prideStream, x => _prideStream = x, -5, 7f);
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, -5, 7f);
             _fundingPoints -= (_testLevel + 1) * 100 / 2;
             //_fundingStream = Mathf.Max(_fundingStream - 3, 0);
             //_researchPoints = _researchPoints;
@@ -268,8 +270,9 @@ public class Country : MonoBehaviour
         {
             /// TODO:   Play some animation
             //_nationalPride -= 100;
+            _prideStreamTween.Pause();
             _prideStream = -7;
-            DOTween.To(() => _prideStream, x => _prideStream = x, -5, 7f);
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, -5, 7f);
             //_fundingPoints -= fundingCosts[countryName][_level];
             //_fundingStream = Mathf.Max(_fundingStream - 3, 0);
             //_researchPoints = _researchPoints;
@@ -293,8 +296,9 @@ public class Country : MonoBehaviour
             /// TODO:   Play some animation
             _propagandaQTE.DoneAnim();
             //_nationalPride += 250;
+            _prideStreamTween?.Pause();
             _prideStream = 10;
-            DOTween.To(() => _prideStream, x => _prideStream = x, -5, 10f);
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, -5, 10f);
             //_fundingPoints -= fundingCosts[countryName][_level] / 4;
             _fundingStream += 2;
             //_researchPoints = _researchPoints;
@@ -388,6 +392,8 @@ public class Country : MonoBehaviour
     [SerializeField] private FlaskQTE _experimentQTE = null;
     [SerializeField] private FlaskQTE _reportQTE = null;
     [SerializeField] private PropagandaQTE _propagandaQTE = null;
+
+    private DG.Tweening.Core.TweenerCore<int, int, DG.Tweening.Plugins.Options.NoOptions> _prideStreamTween = null;
 
     #endregion
 
