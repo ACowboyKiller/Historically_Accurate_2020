@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// The different states of the game
     /// </summary>
-    public enum GameState { Splash, Setup, Gameplay, Results };
+    public enum GameState { Splash, Setup, About, Gameplay, Results };
 
     /// <summary>
     /// The difficulty of the game
@@ -157,6 +157,11 @@ public class GameManager : MonoBehaviour
     public List<Image> levelIcons => _levelIcons;
 
     /// <summary>
+    /// Returns the list of text labels for the research requirements for levels
+    /// </summary>
+    public List<TMP_Text> levelRequirements => _levelRequirements;
+
+    /// <summary>
     /// Returns the respective result label
     /// </summary>
     public TMP_Text experimentResultLabel => _experiementResultLabel;
@@ -165,24 +170,50 @@ public class GameManager : MonoBehaviour
     public TMP_Text testResultLabel => _testResultLabel;
     public TMP_Text launchResultLabel => _launchResultLabel;
 
+    public Image playerFlag => (playerCountry.countryName == CountryName.USA) ? _USAFlag : _USSRFlag;
+    public Image aiFlag => (aiCountry.countryName == CountryName.USA) ? _USAFlag : _USSRFlag;
+
 
     #endregion
 
     #region --------------------    Public Methods
 
     /// <summary>
+    /// Quit the game
+    /// </summary>
+    public void Close()
+    {
+        Application.Quit();
+    }
+
+    /// <summary>
     /// Moves to setup
     /// </summary>
     public void MoveToSetup(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f)
         .SetEase(Ease.OutQuad)
-        .OnComplete(() => { 
-            SetInteractable(_pPrevious); 
+        .OnComplete(() => {
+            SetInteractable(_pPrevious);
             _setup.DOFade(1f, 0.5f)
                 .SetEase(Ease.OutQuad)
                 .OnComplete(() => {
-                    SetInteractable(_setup, true); 
-                }); 
-            state = GameState.Setup; 
+                    SetInteractable(_setup, true);
+                });
+            state = GameState.Setup;
+        });
+
+    /// <summary>
+    /// Moves to about
+    /// </summary>
+    public void MoveToAbout(CanvasGroup _pPrevious) => _pPrevious.DOFade(0f, 0.5f)
+        .SetEase(Ease.OutQuad)
+        .OnComplete(() => {
+            SetInteractable(_pPrevious);
+            _about.DOFade(1f, 0.5f)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() => {
+                    SetInteractable(_about, true);
+                });
+            state = GameState.About;
         });
 
     /// <summary>
@@ -248,7 +279,7 @@ public class GameManager : MonoBehaviour
         if (playerCountry != null) playerCountry.isPlayerControlled = false;
         _countries.Find(c => c.countryName == (CountryName)_pCountry).isPlayerControlled = true;
         _labels.ForEach(l => l.Setup());
-        _camTarget.position = playerCountry.transform.position;
+        _camTarget.DOMove(playerCountry.transform.position, 2f);
         DOTween.To(() => _transposer.m_Heading.m_Bias, x => _transposer.m_Heading.m_Bias = x, (_camTarget.position.x / -2f) * 90f, 2f);
     }
 
@@ -296,7 +327,11 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Attempts to buy a workforce token
     /// </summary>
-    public void BuyToken() => playerCountry.BuyWorkForceToken();
+    public void BuyToken()
+    {
+        playerCountry.BuyWorkForceToken();
+        _textInput.textInput.Select();
+    }
 
     /// <summary>
     /// Updates the visibility of the work tokens
@@ -310,14 +345,60 @@ public class GameManager : MonoBehaviour
         _buyTokensButton.text = (playerCountry.workforceTokens < 3) ? $"<sprite name=Funding> { playerCountry.tokenCost }" : "<color=green>Full</color>";
     }
 
+    /// <summary>
+    /// Called when the player loses
+    /// </summary>
+    /// <param name="_pCountry"></param>
     public void LoseGame(Country _pCountry)
     {
-        Debug.Log("Game Lost");
+        state = GameState.Results;
+        MoveToResults(_gameplay);
+        _resultTitle.text = (playerCountry.countryName == CountryName.USA) ? "Defeat" : "Porazheniye";
+        aiFlag.DOFade(1f, 2f);
     }
 
+    /// <summary>
+    /// Called when the player wins
+    /// </summary>
+    /// <param name="_pCountry"></param>
     public void WinGame(Country _pCountry)
     {
-        Debug.Log("Game Won");
+        state = GameState.Results;
+        MoveToResults(_gameplay);
+        _resultTitle.text = (playerCountry.countryName == CountryName.USA) ? "Victory" : "Pobeda";
+        playerFlag.DOFade(1f, 2f);
+    }
+
+    /// <summary>
+    /// Resets all elements of the gameplay so another round of gameplay can begin
+    /// </summary>
+    public void ResetGameplay()
+    {
+        isCountrySelected = false;
+        _camTarget.DOMove(Vector3.zero, 2f);
+        DOTween.To(() => _transposer.m_Heading.m_Bias, x => _transposer.m_Heading.m_Bias = x, 0f, 2f);
+
+        _textInput.textInput.text = "";
+        timerMod = 1f;
+        OnTimerEmptyEvent = null;
+        progressMod = -1f;
+        OnProgressFullEvent = null;
+        
+        _levelIcons.ForEach(i => i.color = new Color(0.33f, 0.33f, 0.33f));
+        _testProgress.percent = 0f;
+        _launchProgress.percent = 0f;
+
+        _countries.ForEach(c => c.ResetCountry());
+    }
+
+    /// <summary>
+    /// Resets the results screen
+    /// </summary>
+    public void ResetResults()
+    {
+        _resultTitle.text = "";
+        aiFlag.DOFade(0f, 0f);
+        playerFlag.DOFade(0f, 0f);
     }
 
     #endregion
@@ -330,6 +411,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private MeshRenderer _title = null;
     [SerializeField] private CanvasGroup _splash = null;
     [SerializeField] private CanvasGroup _setup = null;
+    [SerializeField] private CanvasGroup _about = null;
     [SerializeField] private CanvasGroup _gameplay = null;
     [SerializeField] private CanvasGroup _results = null;
 
@@ -441,6 +523,20 @@ public class GameManager : MonoBehaviour
     /// </summary>
     [SerializeField] private List<Image> _levelIcons = new List<Image>();
 
+    /// <summary>
+    /// This list of labels for level research point requirements
+    /// </summary>
+    [SerializeField] private List<TMP_Text> _levelRequirements = new List<TMP_Text>();
+
+    /// <summary>
+    /// The title of the result screen
+    /// </summary>
+    [SerializeField] private TMP_Text _resultTitle = null;
+
+    [SerializeField] private Image _USAFlag = null;
+
+    [SerializeField] private Image _USSRFlag = null;
+
     #endregion
 
     #region --------------------    Private Methods
@@ -469,6 +565,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        /// Quit out on escape
+        if (Input.GetKeyDown(KeyCode.Escape)) Close();
+
         /// Advances the state of the game from the splash screen
         if (state == GameState.Splash && Input.GetKeyDown(KeyCode.Return))
         {

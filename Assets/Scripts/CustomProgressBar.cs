@@ -20,7 +20,7 @@ public class CustomProgressBar : MonoBehaviour
 	private Image _image = null;
 	[SerializeField] private Image _fillImage;
 	[SerializeField] [Range(0f, 1f)] private float _percent;
-	[SerializeField] private bool _isHiddenWhenFull = true;
+	//[SerializeField] private bool _isHiddenWhenFull = true;
 	[SerializeField] private bool _flipHorizontal = false;
 
 	#endregion

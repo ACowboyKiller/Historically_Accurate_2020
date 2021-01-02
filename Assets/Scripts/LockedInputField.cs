@@ -14,7 +14,11 @@ public class LockedInputField : InputField
 
     public void OnEndEdit(string _pValue)
     {
-        if (Input.GetKeyDown(KeyCode.Return)) ActivateInputField();
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            ActivateInputField();
+            Select();
+        }
     }
 
     #endregion
