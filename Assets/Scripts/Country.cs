@@ -59,7 +59,8 @@ public class Country : MonoBehaviour
     public void Initialize()
     {
         _StreamPride();
-        _StreamFunding();
+        _StreamFunding(); 
+        _USSRStreamPropaganda();
         for (int i = 0; i < 10; i ++)
         {
             GameManager.instance.levelRequirements[i].text = $"<sprite name=Research> {researchCosts[countryName][i]}";
@@ -214,7 +215,7 @@ public class Country : MonoBehaviour
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.prideBack, Color.green);
             _prideStreamTween.Pause();
             _prideStream = 5;
-            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, -5, 5f);
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, _defaultPrideStream, 5f);
             _fundingPoints -= _testLevel * 100 / 2;
             //_fundingStream += 1;
             _researchPoints += _researchValue / 2;
@@ -235,7 +236,7 @@ public class Country : MonoBehaviour
             //_nationalPride -= 100;
             _prideStreamTween.Pause();
             _prideStream = -7;
-            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, -5, 7f);
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, _defaultPrideStream, 7f);
             _fundingPoints -= (_testLevel + 1) * 100 / 2;
             //_fundingStream = Mathf.Max(_fundingStream - 3, 0);
             //_researchPoints = _researchPoints;
@@ -272,7 +273,7 @@ public class Country : MonoBehaviour
             //_nationalPride -= 100;
             _prideStreamTween.Pause();
             _prideStream = -7;
-            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, -5, 7f);
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, _defaultPrideStream, 7f);
             //_fundingPoints -= fundingCosts[countryName][_level];
             //_fundingStream = Mathf.Max(_fundingStream - 3, 0);
             //_researchPoints = _researchPoints;
@@ -298,7 +299,7 @@ public class Country : MonoBehaviour
             //_nationalPride += 250;
             _prideStreamTween?.Pause();
             _prideStream = 10;
-            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, -5, 10f);
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, _defaultPrideStream, 10f);
             //_fundingPoints -= fundingCosts[countryName][_level] / 4;
             _fundingStream += 2;
             //_researchPoints = _researchPoints;
@@ -386,6 +387,9 @@ public class Country : MonoBehaviour
 
     [SerializeField] private int _workforceTokens = 3;
     private int _tokenCost = 8;
+
+    private float _ussrPropagandaTimer = 0f;
+    private int _ussrPropagandaWaitRemaining = 25;
 
     [SerializeField] private RocketQTE _launchQTE = null;
     [SerializeField] private RocketQTE _testQTE = null;
@@ -491,6 +495,41 @@ public class Country : MonoBehaviour
         //  Perform stream
         _fundingPoints = Mathf.Max(_fundingPoints + _fundingStream, 0);
         /// TODO:   Play some animation
+    }
+
+    /// <summary>
+    /// Streams propaganda every 25 seconds for USSR
+    /// </summary>
+    private void _USSRStreamPropaganda()
+    {
+        //  Breakout if game is not active
+        if (GameManager.state != GameManager.GameState.Gameplay || countryName != GameManager.CountryName.USSR) return;
+
+        //  Configure timer
+        _ussrPropagandaTimer = 0f;
+        DOTween.To(() => _ussrPropagandaTimer, x => _ussrPropagandaTimer = x, 1f, 1f)
+            .OnComplete(_USSRStreamPropaganda);
+
+        //  Launch Propaganda
+        _ussrPropagandaWaitRemaining--;
+        if (_ussrPropagandaWaitRemaining == 0)
+        {
+            _ussrPropagandaWaitRemaining = 25;
+            if (GameManager.instance.progressMod < 0f && GameManager.instance.timerMod > 0f)
+            {
+                GameManager.instance.textInput.text = "";
+                if (UseWorkForceToken())
+                {
+                    CompletePropaganda(true);
+                }
+                else
+                {
+                    GameManager.instance.StartQTE(ActionLabel.instructions[ActionLabel.GameAction.Propaganda]);
+                    PropagandaQTE();
+                }
+            }
+        }
+        GameManager.instance.propagandaActionLabel.text = $"{_ussrPropagandaWaitRemaining.ToString()} Sekundy";
     }
 
     #endregion

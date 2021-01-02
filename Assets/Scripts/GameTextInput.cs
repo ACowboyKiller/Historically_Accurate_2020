@@ -17,7 +17,7 @@ public class GameTextInput : MonoBehaviour
         { "LaunchLabel", new Dictionary<GameManager.CountryName, string> { { GameManager.CountryName.USA, "LAUNCH" }, { GameManager.CountryName.USSR, "ZAPUSK" } } },
         { "TestLabel", new Dictionary<GameManager.CountryName, string> { { GameManager.CountryName.USA, "PUBLIC TEST" }, { GameManager.CountryName.USSR, "OTSENIVAT'" } } },
         { "ReportLabel", new Dictionary<GameManager.CountryName, string> { { GameManager.CountryName.USA, "RESEARCH REPORT" }, { GameManager.CountryName.USSR, "OTCHET" } } },
-        { "PropagandaLabel", new Dictionary<GameManager.CountryName, string> { { GameManager.CountryName.USA, "PROPAGANDA" }, { GameManager.CountryName.USSR, "-" } } },
+        { "PropagandaLabel", new Dictionary<GameManager.CountryName, string> { { GameManager.CountryName.USA, "PROPAGANDA" }, { GameManager.CountryName.USSR, "|" } } },
         { "ExperimentLabel", new Dictionary<GameManager.CountryName, string> { { GameManager.CountryName.USA, "PERFORM EXPERIMENT" }, { GameManager.CountryName.USSR, "ISSLEDOVANIYE" } } }
     };
 
@@ -30,7 +30,17 @@ public class GameTextInput : MonoBehaviour
 
     #region --------------------    Public Methods
 
-
+    /// <summary>
+    /// Initializes the labels to match the player's country
+    /// </summary>
+    public void Init()
+    {
+        Country _player = GameManager.playerCountry;
+        _textLabels.ForEach(l =>
+        {
+            l.textField.text = (textValues[l.name][_player.countryName] != "|") ? textValues[l.name][_player.countryName] : l.textField.text;
+        });
+    }
 
     #endregion
 
@@ -100,7 +110,7 @@ public class GameTextInput : MonoBehaviour
         }
 
         //  Reset the value or maintain if it's valid
-        _textValueCache = (_isValid) ? _pValue : _textValueCache;
+        _textValueCache = (_isValid && _pValue != "|") ? _pValue : _textValueCache;
         _textInput.text = _textValueCache;
     }
 
@@ -113,12 +123,14 @@ public class GameTextInput : MonoBehaviour
         //  Update value to match cache
         _pValue = _textValueCache;
 
+        Country _player = GameManager.playerCountry;
+
         //  Update the labels to display input progression
         _textLabels.ForEach(l =>
         {
-            l.textField.text = (textValues[l.name][GameManager.playerCountry.countryName].StartsWith(_pValue.ToUpper())) ?
-                $"<color=#{ColorUtility.ToHtmlStringRGBA(l.fillColor)}>{_pValue.ToUpper()}</color>{textValues[l.name][GameManager.playerCountry.countryName].Substring(_pValue.Length)}" :
-                textValues[l.name][GameManager.playerCountry.countryName];
+            l.textField.text = (textValues[l.name][_player.countryName].StartsWith(_pValue.ToUpper()) && textValues[l.name][_player.countryName] != "|") ?
+                $"<color=#{ColorUtility.ToHtmlStringRGBA(l.fillColor)}>{_pValue.ToUpper()}</color>{textValues[l.name][_player.countryName].Substring(_pValue.Length)}" :
+                ((textValues[l.name][_player.countryName] != "|")? textValues[l.name][_player.countryName] : l.textField.text);
         });
     }
 

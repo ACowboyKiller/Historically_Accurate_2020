@@ -60,6 +60,11 @@ public class GameManager : MonoBehaviour
     public static Country aiCountry => instance._countries.Find(c => !c.isPlayerControlled);
 
     /// <summary>
+    /// Returns the text input for the game
+    /// </summary>
+    public InputField textInput => _textInput.textInput;
+
+    /// <summary>
     /// Returns the timer bar for the game's QTEs
     /// </summary>
     public CustomProgressBar timerBar => _timer;
@@ -165,6 +170,7 @@ public class GameManager : MonoBehaviour
     /// Returns the respective result label
     /// </summary>
     public TMP_Text experimentResultLabel => _experiementResultLabel;
+    public TMP_Text propagandaActionLabel => _propagandaActionLabel;
     public TMP_Text propagandaResultLabel => _propagandaResultLabel;
     public TMP_Text reportResultLabel => _reportResultLabel;
     public TMP_Text testResultLabel => _testResultLabel;
@@ -317,6 +323,7 @@ public class GameManager : MonoBehaviour
     {
         if (!isCountrySelected) return;
         MoveToGameplay(_setup);
+        _textInput.Init();
     }
 
     /// <summary>
@@ -385,6 +392,7 @@ public class GameManager : MonoBehaviour
         OnTimerEmptyEvent = null;
         progressMod = -1f;
         OnProgressFullEvent = null;
+        _workTokens.ForEach(t => t.gameObject.SetActive(true));
         
         _levelIcons.ForEach(i => i.color = new Color(0.33f, 0.33f, 0.33f));
         _testProgress.percent = 0f;
@@ -480,6 +488,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text _researchValuelbl = null;
 
     [SerializeField] private TMP_Text _experiementResultLabel = null;
+    [SerializeField] private TMP_Text _propagandaActionLabel = null;
     [SerializeField] private TMP_Text _propagandaResultLabel = null;
     [SerializeField] private TMP_Text _reportResultLabel = null;
     [SerializeField] private TMP_Text _testResultLabel = null;
