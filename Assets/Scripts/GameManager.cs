@@ -157,6 +157,16 @@ public class GameManager : MonoBehaviour
     public CustomProgressBar testProgress => _testProgress;
 
     /// <summary>
+    /// Returns the custom progressbar for the ai's launch progress
+    /// </summary>
+    public CustomProgressBar aiLaunchProgress => _aiLaunchPropgress;
+
+    /// <summary>
+    /// Returns the custom progressbar for the ai's public test progress
+    /// </summary>
+    public CustomProgressBar aiTestProgress => _aiTestProgress;
+
+    /// <summary>
     /// Level icons for the ui
     /// </summary>
     public List<Image> levelIcons => _levelIcons;
@@ -246,6 +256,7 @@ public class GameManager : MonoBehaviour
                 });
             state = GameState.Gameplay; 
             playerCountry.Initialize();
+            aiCountry.Initialize();
         });
 
     /// <summary>
@@ -358,11 +369,11 @@ public class GameManager : MonoBehaviour
     /// Called when the player loses
     /// </summary>
     /// <param name="_pCountry"></param>
-    public void LoseGame(Country _pCountry)
+    public void LoseGame(Country _pCountry, string _pReason)
     {
         state = GameState.Results;
         MoveToResults(_gameplay);
-        _resultTitle.text = (playerCountry.countryName == CountryName.USA) ? "Defeat" : "Porazheniye";
+        _resultTitle.text = $"<color=red>{((playerCountry.countryName == CountryName.USA) ? "Defeat" : "Porazheniye")} {_pReason}</color>";
         aiFlag.DOFade(1f, 2f);
     }
 
@@ -370,11 +381,11 @@ public class GameManager : MonoBehaviour
     /// Called when the player wins
     /// </summary>
     /// <param name="_pCountry"></param>
-    public void WinGame(Country _pCountry)
+    public void WinGame(Country _pCountry, string _pReason)
     {
         state = GameState.Results;
         MoveToResults(_gameplay);
-        _resultTitle.text = (playerCountry.countryName == CountryName.USA) ? "Victory" : "Pobeda";
+        _resultTitle.text = $"<color=green>{((playerCountry.countryName == CountryName.USA) ? "Victory" : "Pobeda")} {_pReason}</color>";
         playerFlag.DOFade(1f, 2f);
     }
 
@@ -395,6 +406,8 @@ public class GameManager : MonoBehaviour
         _workTokens.ForEach(t => t.gameObject.SetActive(true));
         
         _levelIcons.ForEach(i => i.color = new Color(0.33f, 0.33f, 0.33f));
+        _aiTestProgress.percent = 0f;
+        _aiLaunchPropgress.percent = 0f;
         _testProgress.percent = 0f;
         _launchProgress.percent = 0f;
 
@@ -525,9 +538,19 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CustomProgressBar _testProgress = null;
 
     /// <summary>
-    /// The custom progress bar for the public test level
+    /// The custom progress bar for the launch level
     /// </summary>
     [SerializeField] private CustomProgressBar _launchProgress = null;
+
+    /// <summary>
+    /// The custom progress bar for the ai public test level
+    /// </summary>
+    [SerializeField] private CustomProgressBar _aiTestProgress = null;
+
+    /// <summary>
+    /// The custom progress bar for the ai launch level
+    /// </summary>
+    [SerializeField] private CustomProgressBar _aiLaunchPropgress = null;
 
     /// <summary>
     /// The list of icons for the levels for the UI
