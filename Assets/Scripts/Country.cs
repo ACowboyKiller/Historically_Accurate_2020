@@ -49,6 +49,11 @@ public class Country : MonoBehaviour
     /// </summary>
     public int tokenCost => _tokenCost;
 
+    /// <summary>
+    /// Returns whether or not the country is the USA
+    /// </summary>
+    public bool isUSA => countryName == GameManager.CountryName.USA;
+
     #endregion
 
     #region --------------------    Public Methods
@@ -59,11 +64,26 @@ public class Country : MonoBehaviour
     public void Initialize()
     {
         _StreamPride();
-        _StreamFunding(); 
+        _StreamFunding();
         _USSRStreamPropaganda();
-        for (int i = 0; i < 10; i ++)
+        if (isPlayerControlled)
         {
-            GameManager.instance.levelRequirements[i].text = $"<sprite name=Research> {researchCosts[countryName][i]}";
+            for (int i = 0; i < 10; i++)
+            {
+                GameManager.instance.levelRequirements[i].text = $"<sprite name=Research> {researchCosts[countryName][i]}";
+            }
+        }
+        else
+        {
+            _aiInstantActions.Clear();
+
+            _aiInstantActions.Add(ActionLabel.GameAction.Launch, CompleteLaunch);
+            _aiInstantActions.Add(ActionLabel.GameAction.Test, CompleteTest);
+            _aiInstantActions.Add(ActionLabel.GameAction.Report, CompleteReport);
+            _aiInstantActions.Add(ActionLabel.GameAction.Propaganda, CompletePropaganda);
+            _aiInstantActions.Add(ActionLabel.GameAction.Experiment, CompleteExperiment);
+
+            _prideStream = 0;
         }
     }
 
@@ -73,6 +93,7 @@ public class Country : MonoBehaviour
     public void ResetCountry()
     {
         isPlayerControlled = false;
+        _isInQTE = false;
         _testLevel = 0;
         _level = 0;
         _nationalPride = _defaultPride;
@@ -85,6 +106,7 @@ public class Country : MonoBehaviour
         _researchValue = _defaultResearchValue;
         _workforceTokens = 3;
         _tokenCost = 8;
+        _aiActionTimer = 0f;
     }
 
     /// <summary>
@@ -95,13 +117,13 @@ public class Country : MonoBehaviour
         if (_workforceTokens == 3) return false;
         if (_fundingPoints < _tokenCost)
         {
-            GameManager.instance.FlashStatLabelBack(GameManager.instance.fundingBack, Color.red);
+            if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.fundingBack, Color.red);
             return false;
         }
         _fundingPoints -= _tokenCost;
         _tokenCost *= 2;
         _workforceTokens++;
-        GameManager.instance.gainTokenParticles.Play();
+        if (isPlayerControlled) GameManager.instance.gainTokenParticles.Play();
         GameManager.instance.UpdateTokens();
         /// TODO:   Play some animation
         return true;
@@ -114,7 +136,7 @@ public class Country : MonoBehaviour
     {
         if (_workforceTokens <= 0) return false;
         _workforceTokens--;
-        GameManager.instance.useTokenParticles.Play();
+        if (isPlayerControlled) GameManager.instance.useTokenParticles.Play();
         GameManager.instance.UpdateTokens();
         /// TODO:   Play some animation
         return true;
@@ -129,10 +151,10 @@ public class Country : MonoBehaviour
     {
         switch (_pAction)
         {
-            case ActionLabel.GameAction.Experiment: return _fundingPoints >= (_level + 1) * 100 / 10;
-            case ActionLabel.GameAction.Propaganda: return _fundingPoints >= (_level + 1) * 100 / 4;
+            case ActionLabel.GameAction.Experiment: return _fundingPoints >= (_level + 1) * 100 / ((isUSA) ? 10 : 8);
+            case ActionLabel.GameAction.Propaganda: return _fundingPoints >= (_level + 1) * 100 / ((isUSA) ? 4 : 3);
             case ActionLabel.GameAction.Report: return true;
-            case ActionLabel.GameAction.Test: return _fundingPoints >= (_level + 1) * 100 / 2;
+            case ActionLabel.GameAction.Test: return _fundingPoints >= (_level + 1) * ((isUSA)? 110: 100) / 2;
             case ActionLabel.GameAction.Launch: return _fundingPoints >= (_level + 1) * 100;
         }
         return false;
@@ -161,16 +183,18 @@ public class Country : MonoBehaviour
     /// </summary>
     public void CompleteLaunch(bool _pSuccess = false)
     {
+        _isInQTE = false;
         if (_pSuccess)
         {
             _launchQTE.RocketAnim();
             _level++;
-            if (_level > 9) GameManager.instance.WinGame(this);
-            _nationalPride += 150;
+            if (_level > 9 && isPlayerControlled) GameManager.instance.WinGame(this, "\n(You've reched the Moon!)");
+            if (_level > 9 && !isPlayerControlled) GameManager.instance.LoseGame(GameManager.playerCountry, "\n(Your opponent has reached the Moon!)");
+            _nationalPride += (isUSA) ? 165 : 150;
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.prideBack, Color.green);
             //_prideStream = _prideStream;
             _fundingPoints -= _level * 100;
-            _fundingStream += 1;
+            _fundingStream += (isUSA) ? 2 : 1;
             //_researchPoints = _researchPoints;
             //_researchValue = _researchValue;
             if (isPlayerControlled)
@@ -181,11 +205,18 @@ public class Country : MonoBehaviour
                     .SetEase(Ease.OutQuad)
                     .OnComplete(() => { GameManager.instance.levelIcons[_level - 1].color = GameManager.instance.launchProgress.effectColor; });
             }
+            else
+            {
+                DOTween.To(() => GameManager.instance.aiLaunchProgress.percent,
+                    x => GameManager.instance.aiLaunchProgress.percent = x,
+                    GameManager.instance.aiLaunchProgress.percent + (1f / 10f), 0.5f)
+                    .SetEase(Ease.OutQuad);
+            }
         }
         else
         {
             /// TODO:   Play some animation
-            _nationalPride -= 100;
+            _nationalPride -= ((isUSA) ? 100 : 80);
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.prideBack, Color.red);
             //_prideStream = _prideStream;
             _fundingPoints -= (_level + 1) * 100;
@@ -199,26 +230,31 @@ public class Country : MonoBehaviour
     /// Begins the launch qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void LaunchQTE(bool _pEmpty = false) => _launchQTE.Init();
+    public void LaunchQTE(bool _pEmpty = false)
+    {
+        _isInQTE = true;
+        _launchQTE.Init();
+    }
 
     /// <summary>
     /// Performs some animation whenever a public test is completed
     /// </summary>
     public void CompleteTest(bool _pSuccess = false)
     {
+        _isInQTE = false;
         if (_pSuccess)
         {
             /// TODO:   Play some animation
             _testQTE.RocketAnim();
             _testLevel++;
-            _nationalPride += 50;
+            _nationalPride += (isUSA) ? 55 : 50;
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.prideBack, Color.green);
             _prideStreamTween.Pause();
             _prideStream = 5;
-            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, _defaultPrideStream, 5f);
-            _fundingPoints -= _testLevel * 100 / 2;
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, (isPlayerControlled)? _defaultPrideStream : 0, 5f);
+            _fundingPoints -= _testLevel * ((isUSA) ? 110 : 100) / 2;
             //_fundingStream += 1;
-            _researchPoints += _researchValue / 2;
+            _researchPoints += (isUSA) ? _researchValue / 2 : 0;
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.researchBack, Color.green);
             //_researchValue = _researchValue;
             if (isPlayerControlled)
@@ -229,15 +265,22 @@ public class Country : MonoBehaviour
                     .SetEase(Ease.OutQuad)
                     .OnComplete(() => { GameManager.instance.levelIcons[_testLevel - 1].color = GameManager.instance.testProgress.effectColor; });
             }
+            else
+            {
+                DOTween.To(() => GameManager.instance.aiTestProgress.percent,
+                    x => GameManager.instance.aiTestProgress.percent = x,
+                    GameManager.instance.aiTestProgress.percent + (1f / 10f), 0.5f)
+                    .SetEase(Ease.OutQuad);
+            }
         }
         else
         {
             /// TODO:   Play some animation
             //_nationalPride -= 100;
             _prideStreamTween.Pause();
-            _prideStream = -7;
-            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, _defaultPrideStream, 7f);
-            _fundingPoints -= (_testLevel + 1) * 100 / 2;
+            _prideStream = (isUSA) ? -7 : -5;
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, (isPlayerControlled) ? _defaultPrideStream : 0, 7f);
+            _fundingPoints -= (_testLevel + 1) * ((isUSA) ? 110 : 100) / 2;
             //_fundingStream = Mathf.Max(_fundingStream - 3, 0);
             //_researchPoints = _researchPoints;
             //_researchValue = _researchValue;
@@ -248,13 +291,18 @@ public class Country : MonoBehaviour
     /// Begins the test qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void TestQTE(bool _pEmpty = false) => _testQTE.Init();
+    public void TestQTE(bool _pEmpty = false)
+    {
+        _isInQTE = true;
+        _testQTE.Init();
+    }
 
     /// <summary>
     /// Performs some animation whenever a research report is completed
     /// </summary>
     public void CompleteReport(bool _pSuccess = false)
     {
+        _isInQTE = false;
         if (_pSuccess)
         {
             /// TODO:   Play some animation
@@ -263,7 +311,7 @@ public class Country : MonoBehaviour
             //_prideStream = _prideStream;
             //_fundingPoints -= fundingCosts[countryName][_level];
             _fundingStream += 1;
-            _researchPoints += _researchValue * (3 - (int)GameManager.difficulty);
+            _researchPoints += Mathf.FloorToInt((_researchValue * ((isPlayerControlled)?(3 - (int)GameManager.difficulty):2)) * ((isUSA) ? 1.1f : 1f));
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.researchBack, Color.green);
             _researchValue += 1;
         }
@@ -272,8 +320,8 @@ public class Country : MonoBehaviour
             /// TODO:   Play some animation
             //_nationalPride -= 100;
             _prideStreamTween.Pause();
-            _prideStream = -7;
-            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, _defaultPrideStream, 7f);
+            _prideStream = (isUSA) ? -7 : -5;
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, (isPlayerControlled) ? _defaultPrideStream : 0, 7f);
             //_fundingPoints -= fundingCosts[countryName][_level];
             //_fundingStream = Mathf.Max(_fundingStream - 3, 0);
             //_researchPoints = _researchPoints;
@@ -285,23 +333,28 @@ public class Country : MonoBehaviour
     /// Begins the report qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void ReportQTE(bool _pEmpty = false) => _reportQTE.Init();
+    public void ReportQTE(bool _pEmpty = false)
+    {
+        _isInQTE = true;
+        _reportQTE.Init();
+    }
 
     /// <summary>
     /// Performs some animation whenever propaganda is completed
     /// </summary>
     public void CompletePropaganda(bool _pSuccess = false)
     {
+        _isInQTE = false;
         if (_pSuccess)
         {
             /// TODO:   Play some animation
             _propagandaQTE.DoneAnim();
             //_nationalPride += 250;
             _prideStreamTween?.Pause();
-            _prideStream = 10;
-            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, _defaultPrideStream, 10f);
+            _prideStream = (isUSA) ? 10 : 15;
+            _prideStreamTween = DOTween.To(() => _prideStream, x => _prideStream = x, (isPlayerControlled) ? _defaultPrideStream : 0, (isUSA) ? 10f : 15f);
             //_fundingPoints -= fundingCosts[countryName][_level] / 4;
-            _fundingStream += 2;
+            _fundingStream += (isUSA) ? 3 : 2;
             //_researchPoints = _researchPoints;
             //_researchValue = _researchValue;
         }
@@ -310,8 +363,8 @@ public class Country : MonoBehaviour
             /// TODO:   Play some animation
             //_nationalPride -= 100;
             //_prideStream = _prideStream;
-            _fundingPoints -= researchCosts[countryName][_level] / 4;
-            _fundingStream = Mathf.Max(_fundingStream - 2, 0);
+            _fundingPoints -= researchCosts[countryName][_level] / ((isUSA) ? 4 : 3);
+            _fundingStream = Mathf.Max(_fundingStream - ((isUSA) ? 3 : 2), 0);
             //_researchPoints = _researchPoints;
             //_researchValue = _researchValue;
         }
@@ -321,22 +374,27 @@ public class Country : MonoBehaviour
     /// Begins the propaganda qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void PropagandaQTE(bool _pEmpty = false) => _propagandaQTE.Init();
+    public void PropagandaQTE(bool _pEmpty = false)
+    {
+        _isInQTE = true; 
+        _propagandaQTE.Init();
+    }
 
     /// <summary>
     /// Performs some animation whenever an expirement is completed and updates the research point total
     /// </summary>
     public void CompleteExperiment(bool _pSuccess = false)
     {
+        _isInQTE = false;
         if (_pSuccess)
         {
             /// TODO:   Play some animation
             _experimentQTE.FlaskAnim();
             //_nationalPride += 250;
             //_prideStream = _prideStream;
-            _fundingPoints -= researchCosts[countryName][_level] / 10;
+            _fundingPoints -= researchCosts[countryName][_level] / ((isUSA) ? 10 : 8);
             _fundingStream += 2;
-            _researchPoints += (_researchValue * 2) * (3 - (int)GameManager.difficulty);
+            _researchPoints += ((_researchValue * 2) * ((isPlayerControlled)?(3 - (int)GameManager.difficulty):2)) + ((isUSA) ? 0 : 2);
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.researchBack, Color.green);
             //_researchValue = _researchValue;
         }
@@ -349,7 +407,7 @@ public class Country : MonoBehaviour
             //_fundingStream = Mathf.Max(_fundingStream - 3, 0);
             _researchPoints += _researchValue;
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.researchBack, Color.green);
-            _researchValue = Mathf.Max(_researchValue - 1, 1);
+            _researchValue = Mathf.Max(_researchValue - ((isUSA) ? 0 : 1), 1);
         }
     }
 
@@ -357,7 +415,11 @@ public class Country : MonoBehaviour
     /// Begins the experiment qte
     /// </summary>
     /// <param name="_pbool"></param>
-    public void ExperimentQTE(bool _pEmpty = false) => _experimentQTE.Init();
+    public void ExperimentQTE(bool _pEmpty = false)
+    {
+        _isInQTE = true;
+        _experimentQTE.Init();
+    }
 
     #endregion
 
@@ -367,6 +429,8 @@ public class Country : MonoBehaviour
     private int _level = 0;
 
     [SerializeField] GameManager.CountryName _countryName = GameManager.CountryName.USA;
+
+    private bool _isInQTE = false;
 
     [SerializeField] private int _nationalPride = 0;
     private int _defaultPride = 0;
@@ -399,6 +463,15 @@ public class Country : MonoBehaviour
 
     private DG.Tweening.Core.TweenerCore<int, int, DG.Tweening.Plugins.Options.NoOptions> _prideStreamTween = null;
 
+    private float _aiActionTimer = 0f;
+
+    private float[] _aiActionProbabilities = new float[] { 0.7f, 0.8f, 0.9f };
+
+    /// <summary>
+    /// Available Game Actions
+    /// </summary>
+    private Dictionary<ActionLabel.GameAction, System.Action<bool>> _aiInstantActions = new Dictionary<ActionLabel.GameAction, System.Action<bool>>() { };
+
     #endregion
 
     #region --------------------    Private Methods
@@ -421,39 +494,51 @@ public class Country : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (GameManager.state != GameManager.GameState.Gameplay || !isPlayerControlled) return;
-        GameManager.instance.prideLabel.text = _nationalPride.ToString();
-        GameManager.instance.prideStreamLabel.text = $"<sprite name={(_prideStream > 0 ? "Up" : "Down")}> {_prideStream}";
-        GameManager.instance.fundingLabel.text = _fundingPoints.ToString();
-        GameManager.instance.fundingStreamlabel.text = $"<sprite name={(_fundingStream > 0 ? "Up" : "Down")}> {_fundingStream}";
-        GameManager.instance.researchLabel.text = _researchPoints.ToString();
-        GameManager.instance.reserachValueLabel.text = $"<sprite name=ResearchValue> {_researchValue}";
-        GameManager.instance.reserachValueLabel.text = $"<sprite name=ResearchValue> {_researchValue}";
+        if (GameManager.state != GameManager.GameState.Gameplay) return;
+        if (!isPlayerControlled)
+        {
+            _aiActionTimer -= Time.deltaTime;
+            if (_aiActionTimer <= 0f)
+            {
+                _aiActionTimer = Random.Range((3 - (float)GameManager.difficulty), 2f * (3 - (float)GameManager.difficulty));
+                _ChooseAIAction();
+            }
+        }
+        else
+        {
+            GameManager.instance.prideLabel.text = _nationalPride.ToString();
+            GameManager.instance.prideStreamLabel.text = $"<sprite name={(_prideStream > 0 ? "Up" : "Down")}> {_prideStream}";
+            GameManager.instance.fundingLabel.text = _fundingPoints.ToString();
+            GameManager.instance.fundingStreamlabel.text = $"<sprite name={(_fundingStream > 0 ? "Up" : "Down")}> {_fundingStream}";
+            GameManager.instance.researchLabel.text = _researchPoints.ToString();
+            GameManager.instance.reserachValueLabel.text = $"<sprite name=ResearchValue> {_researchValue}";
+            GameManager.instance.reserachValueLabel.text = $"<sprite name=ResearchValue> {_researchValue}";
         
-        GameManager.instance.experimentResultLabel.text = $"<sprite name=Funding><color=red> {(_level + 1) * 100 / 10}</color>     " +
-            $"<sprite name=FundingStream><color=green> 2</color>|<color=red>0</color>     " +
-            $"<sprite name=Research><color=green> {(_researchValue * 2) * (3 - (int)GameManager.difficulty)}</color>|<color=green>{_researchValue}</color>     " +
-            $"<sprite name=ResearchValue><color=green> 0</color>|<color=red>1</color>";
+            GameManager.instance.experimentResultLabel.text = $"<sprite name=Funding><color=red> {(_level + 1) * 100 / ((isUSA) ? 10 : 8)}</color>     " +
+                $"<sprite name=FundingStream><color=green> 2</color>|<color=red>0</color>     " +
+                $"<sprite name=Research><color=green> {((_researchValue * 2) * (3 - (int)GameManager.difficulty)) + ((isUSA) ? 0 : 2)}</color>|<color=green>{_researchValue}</color>     " +
+                $"<sprite name=ResearchValue><color=green> 0</color>|<color=red>{((isUSA) ? 0 : 1)}</color>";
 
-        GameManager.instance.propagandaResultLabel.text = $"<sprite name=PrideStream><color=green> 10</color>|<color=red>0</color>     " +
-            $"<sprite name=Funding><color=green> 0</color>|<color=red>{(_level + 1) * 100 / 4}</color>     " +
-            $"<sprite name=FundingStream><color=green> 2</color>|<color=red>2</color>     ";
+            GameManager.instance.propagandaResultLabel.text = $"<sprite name=PrideStream><color=green> {((isUSA) ? 10 : 15)}</color>|<color=red>0</color>     " +
+                $"<sprite name=Funding><color=green> 0</color>|<color=red>{(_level + 1) * 100 / ((isUSA)? 4 : 3)}</color>     " +
+                $"<sprite name=FundingStream><color=green> {((isUSA)? 3: 2)}</color>|<color=red>{((isUSA) ? 3 : 2)}</color>     ";
 
-        GameManager.instance.reportResultLabel.text = $"<sprite name=PrideStream><color=green> 0</color>|<color=red>7</color>     " +
-            $"<sprite name=FundingStream><color=green> 1</color>|<color=red>0</color>     " +
-            $"<sprite name=Research><color=green> {_researchValue * (3 - (int)GameManager.difficulty)}</color>|<color=red>0</color>     " +
-            $"<sprite name=ResearchValue><color=green> 1</color>|<color=red>0</color>";
+            GameManager.instance.reportResultLabel.text = $"<sprite name=PrideStream><color=green> 0</color>|<color=red>7</color>     " +
+                $"<sprite name=FundingStream><color=green> 1</color>|<color=red>0</color>     " +
+                $"<sprite name=Research><color=green> {Mathf.FloorToInt((_researchValue * (3 - (int)GameManager.difficulty)) * ((isUSA) ? 1.1f : 1f))}</color>|<color=red>0</color>     " +
+                $"<sprite name=ResearchValue><color=green> 1</color>|<color=red>0</color>";
 
-        GameManager.instance.testResultLabel.text = $"<sprite name=\"Level\" color=#{ColorUtility.ToHtmlStringRGBA(GameManager.instance.testProgress.effectColor)}><color=green> 1</color>|<color=red>0</color>     " +
-            $"<sprite name=Pride><color=green> 50</color>|<color=red>0</color>     " +
-            $"<sprite name=PrideStream><color=green> 5</color>|<color=red>7</color>     " +
-            $"<sprite name=Funding><color=red> {(_testLevel + 1) * 100 / 2}</color>     " +
-            $"<sprite name=Research><color=green> {_researchValue / 2}</color>|<color=red>0</color>";
+            GameManager.instance.testResultLabel.text = $"<sprite name=\"Level\" color=#{ColorUtility.ToHtmlStringRGBA(GameManager.instance.testProgress.effectColor)}><color=green> 1</color>|<color=red>0</color>     " +
+                $"<sprite name=Pride><color=green> {((isUSA) ? 55 : 50)}</color>|<color=red>0</color>     " +
+                $"<sprite name=PrideStream><color=green> 5</color>|<color=red>{((isUSA) ? 7 : 5)}</color>     " +
+                $"<sprite name=Funding><color=red> {(_testLevel + 1) * ((isUSA) ? 110 : 100) / 2}</color>     " +
+                $"<sprite name=Research><color=green> {((isUSA) ? _researchValue / 2 : 0)}</color>|<color=red>0</color>";
 
-        GameManager.instance.launchResultLabel.text = $"<sprite name=\"Level\" color=#{ColorUtility.ToHtmlStringRGBA(GameManager.instance.launchProgress.effectColor)}><color=green> 1</color>|<color=red>0</color>     " +
-            $"<sprite name=Pride><color=green> 150</color>|<color=red>100</color>     " +
-            $"<sprite name=Funding><color=red> {(_level + 1) * 100}</color>     " +
-            $"<sprite name=FundingStream><color=green> 1</color>|<color=red>3</color>";
+            GameManager.instance.launchResultLabel.text = $"<sprite name=\"Level\" color=#{ColorUtility.ToHtmlStringRGBA(GameManager.instance.launchProgress.effectColor)}><color=green> 1</color>|<color=red>0</color>     " +
+                $"<sprite name=Pride><color=green> {((isUSA) ? 165 : 150)}</color>|<color=red>{((isUSA) ? 100 : 80)}</color>     " +
+                $"<sprite name=Funding><color=red> {(_level + 1) * 100}</color>     " +
+                $"<sprite name=FundingStream><color=green> {((isUSA) ? 2: 1)}</color>|<color=red>{((isUSA) ? 3 : 1)}</color>";
+        }
     }
 
     /// <summary>
@@ -473,10 +558,11 @@ public class Country : MonoBehaviour
         _nationalPride = Mathf.Max(_prideStream + _nationalPride, 0);
 
         /// TODO:   Play some animation
-        if (_nationalPride < 100)  GameManager.instance.FlashStatLabelBack(GameManager.instance.prideBack, Color.red);
+        if (_nationalPride < 100 && isPlayerControlled)  GameManager.instance.FlashStatLabelBack(GameManager.instance.prideBack, Color.red);
 
         //  Check for game end
-        if (_nationalPride == 0) GameManager.instance.LoseGame(this);
+        if (_nationalPride == 0 && isPlayerControlled) GameManager.instance.LoseGame(this, "\n(Your nation has lost its pride)");
+        if (_nationalPride == 0 && !isPlayerControlled) GameManager.instance.WinGame(GameManager.playerCountry, "\n(Your opponent's nation has lost its pride)");
     }
 
     /// <summary>
@@ -515,21 +601,89 @@ public class Country : MonoBehaviour
         if (_ussrPropagandaWaitRemaining == 0)
         {
             _ussrPropagandaWaitRemaining = 25;
-            if (GameManager.instance.progressMod < 0f && GameManager.instance.timerMod > 0f)
+            if (isPlayerControlled)
             {
-                GameManager.instance.textInput.text = "";
-                if (UseWorkForceToken())
+                if (!_isInQTE)
                 {
-                    CompletePropaganda(true);
+                    GameManager.instance.textInput.text = "";
+                    if (UseWorkForceToken())
+                    {
+                        CompletePropaganda(true);
+                    }
+                    else
+                    {
+                        GameManager.instance.StartQTE(ActionLabel.instructions[ActionLabel.GameAction.Propaganda]);
+                        PropagandaQTE();
+                    }
                 }
-                else
+            }
+            else
+            {
+                if (!_isInQTE)
                 {
-                    GameManager.instance.StartQTE(ActionLabel.instructions[ActionLabel.GameAction.Propaganda]);
-                    PropagandaQTE();
+                    CompletePropaganda(UseWorkForceToken() || (Random.Range(0f, _aiActionProbabilities[(int)GameManager.difficulty]) > 0.5f));
                 }
             }
         }
-        GameManager.instance.propagandaActionLabel.text = $"{_ussrPropagandaWaitRemaining.ToString()} Sekundy";
+        if (isPlayerControlled) GameManager.instance.propagandaActionLabel.text = $"{_ussrPropagandaWaitRemaining.ToString()} Sekundy";
+    }
+
+    /// <summary>
+    /// Chooses an action to perform and is randomly successful or not
+    /// </summary>
+    private void _ChooseAIAction()
+    {
+        //  TODO:   Maybe make the action choice more sophisticated than just random
+        ActionLabel.GameAction _gameAction = (ActionLabel.GameAction)Random.Range(0, System.Enum.GetValues(typeof(ActionLabel.GameAction)).Length);
+        _gameAction = (countryName == GameManager.CountryName.USSR && _gameAction == ActionLabel.GameAction.Propaganda) ? ActionLabel.GameAction.Experiment : _gameAction;
+        _gameAction = (_nationalPride < 200) ? ActionLabel.GameAction.Launch : _gameAction;
+        if (HasFunding(_gameAction))
+        {
+            if (_gameAction == ActionLabel.GameAction.Launch && !HasTestedLevel())
+            {
+                _gameAction = ActionLabel.GameAction.Test;
+                if (!HasFunding(_gameAction))
+                {
+                    return;
+                }
+            }
+            if ((_gameAction == ActionLabel.GameAction.Launch && !HasLaunchResearchPoints()) ||
+                (_gameAction == ActionLabel.GameAction.Test && !HasTestResearchPoints()))
+            {
+                if (Random.Range(0f, 1f) > 0.5f)
+                {
+                    if (!HasFunding(ActionLabel.GameAction.Report))
+                    {
+                        return;
+                    }
+                    CompleteReport(UseWorkForceToken() || (Random.Range(0f, _aiActionProbabilities[(int)GameManager.difficulty]) > 0.5f));
+                    return;
+                }
+                else
+                {
+                    if (!HasFunding(ActionLabel.GameAction.Experiment))
+                    {
+                        return;
+                    }
+                    CompleteExperiment(UseWorkForceToken() || (Random.Range(0f, _aiActionProbabilities[(int)GameManager.difficulty]) > 0.5f));
+                    return;
+                }
+            }
+            _aiInstantActions[_gameAction]?.Invoke(UseWorkForceToken() || (Random.Range(0f, _aiActionProbabilities[(int)GameManager.difficulty]) > 0.5f));
+        }
+        else
+        {
+            if (Random.Range(0f, 1f) > 0.5f)
+            {
+                if (!HasFunding(ActionLabel.GameAction.Report)) return;
+                CompleteReport(UseWorkForceToken() || (Random.Range(0f, _aiActionProbabilities[(int)GameManager.difficulty]) > 0.5f));
+            }
+            else
+            {
+                if (!HasFunding(ActionLabel.GameAction.Experiment)) return;
+                CompleteExperiment(UseWorkForceToken() || (Random.Range(0f, _aiActionProbabilities[(int)GameManager.difficulty]) > 0.5f));
+            }
+        }
     }
 
     #endregion

@@ -85,7 +85,11 @@ public class GameTextInput : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (GameManager.state == GameManager.GameState.Gameplay && !textInput.isFocused) textInput.Select();
+        if (GameManager.state == GameManager.GameState.Gameplay && !textInput.isFocused)
+        {
+            textInput.Select();
+            textInput.text = "";
+        }
     }
 
     /// <summary>

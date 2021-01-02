@@ -67,6 +67,7 @@ public class PropagandaQTE : MonoBehaviour
     /// </summary>
     public void DoneAnim()
     {
+        _completeParticles.Play();
         //_towers.ForEach(t => t.gameObject.SetActive(isActive));
         /// TODO:   Play a sound
     }
@@ -103,6 +104,7 @@ public class PropagandaQTE : MonoBehaviour
     private float _timerTime = 1f;
 
     [SerializeField] private List<Tower> _towers = new List<Tower>();
+    [SerializeField] private ParticleSystem _completeParticles = null;
 
     #endregion
 
