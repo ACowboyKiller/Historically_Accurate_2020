@@ -54,6 +54,7 @@ public class Tower : MonoBehaviour
         if (!_qte.isActive || !_isClickable) return;
         _isClickable = false;
         _sparks.Play();
+        if (_qte.isPlayerControlled) SoundManager.SFX("PositiveButton");
         GameManager.instance.progressBar.percent += (1f / _qte.towerCount);
         transform.DOLocalMoveY(0f, 1f)
             .OnComplete(() => { 

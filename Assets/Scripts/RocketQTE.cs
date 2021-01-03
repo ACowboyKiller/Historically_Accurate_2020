@@ -58,6 +58,7 @@ public class RocketQTE : MonoBehaviour
     public void RocketAnim()
     {
         /// TODO:   Play a sound
+        if (_country.isPlayerControlled) SoundManager.SFX("RocketComplete");
         _rocketTween?.Pause();
         _rocket.gameObject.SetActive(true);
         _rocket.localPosition = Vector3.zero;
@@ -104,6 +105,7 @@ public class RocketQTE : MonoBehaviour
         }
         _rocket.gameObject.SetActive(false);
         GameManager.instance.EndQTE();
+        if (_country.isPlayerControlled) SoundManager.SFX("NegativeButton");
         /// TODO:   Play a sound
     }
 
@@ -116,6 +118,7 @@ public class RocketQTE : MonoBehaviour
     private float _progressTime = 1f;
     private bool _complete = false;
 
+    [SerializeField] private Country _country = null;
     [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Launch;
     [SerializeField] private Transform _rocket = null;
     [SerializeField] private ParticleSystem _smoke = null;

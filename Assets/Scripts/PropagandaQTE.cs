@@ -30,6 +30,11 @@ public class PropagandaQTE : MonoBehaviour
     /// </summary>
     public int towerCount { get; private set; } = 0;
 
+    /// <summary>
+    /// Returns whether or not the qte is player controlled
+    /// </summary>
+    public bool isPlayerControlled => _country.isPlayerControlled;
+
     #endregion
 
     #region --------------------    Public Methods
@@ -68,6 +73,7 @@ public class PropagandaQTE : MonoBehaviour
     public void DoneAnim()
     {
         _completeParticles.Play();
+        if (_country.isPlayerControlled) SoundManager.SFX("PropagandaComplete");
         //_towers.ForEach(t => t.gameObject.SetActive(isActive));
         /// TODO:   Play a sound
     }
@@ -94,6 +100,7 @@ public class PropagandaQTE : MonoBehaviour
         _towers.ForEach(t => t.gameObject.SetActive(false));
         GameManager.instance.EndQTE();
         /// TODO:   Play a sound
+        if (_country.isPlayerControlled) SoundManager.SFX("NegativeButton");
     }
 
     #endregion
@@ -103,6 +110,7 @@ public class PropagandaQTE : MonoBehaviour
     private bool _isActive = false;
     private float _timerTime = 1f;
 
+    [SerializeField] private Country _country = null;
     [SerializeField] private List<Tower> _towers = new List<Tower>();
     [SerializeField] private ParticleSystem _completeParticles = null;
 

@@ -57,6 +57,7 @@ public class FlaskQTE : MonoBehaviour
     public void FlaskAnim()
     {
         /// TODO:   Play a sound
+        if (_country.isPlayerControlled) SoundManager.SFX("PositiveButton");
         _flaskTween?.Pause();
         _flask.gameObject.SetActive(true);
         _flask.localPosition = Vector3.zero;
@@ -112,6 +113,7 @@ public class FlaskQTE : MonoBehaviour
     private float _timerTime = 0.25f;
     private float _clickCount = 0f;
 
+    [SerializeField] private Country _country = null;
     [SerializeField] private ActionLabel.GameAction _action = ActionLabel.GameAction.Experiment;
     [SerializeField] private Transform _flask = null;
     [SerializeField] private ParticleSystem _chemicals = null;
@@ -138,6 +140,7 @@ public class FlaskQTE : MonoBehaviour
     {
         if (!_isActive) return;
         GameManager.instance.progressBar.percent += 1f / Mathf.Max(_clickCount, 1f);
+        if (_country.isPlayerControlled) SoundManager.SFX("FlaskClick");
     }
 
     #endregion

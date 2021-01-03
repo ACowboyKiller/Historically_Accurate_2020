@@ -114,10 +114,15 @@ public class Country : MonoBehaviour
     /// </summary>
     public bool BuyWorkForceToken()
     {
-        if (_workforceTokens == 3) return false;
+        if (_workforceTokens == 3)
+        {
+            if (isPlayerControlled) SoundManager.SFX("NegativeButton");
+            return false;
+        }
         if (_fundingPoints < _tokenCost)
         {
             if (isPlayerControlled) GameManager.instance.FlashStatLabelBack(GameManager.instance.fundingBack, Color.red);
+            if (isPlayerControlled) SoundManager.SFX("NegativeButton");
             return false;
         }
         _fundingPoints -= _tokenCost;

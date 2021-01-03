@@ -69,6 +69,7 @@ public class ActionLabel : MonoBehaviour
             if (_gameAction == GameAction.Launch && !_player.HasTestedLevel())
             {
                 GameManager.instance.FlashStatLabelBack(GameManager.instance.levelProgBack, Color.red);
+                SoundManager.SFX("NegativeButton");
                 return;
             }
             if ((_gameAction == GameAction.Launch && !_player.HasLaunchResearchPoints()) ||
@@ -76,6 +77,7 @@ public class ActionLabel : MonoBehaviour
             {
                 //  TODO:   Unable to perform action.  Play sound / do UI animation
                 GameManager.instance.FlashStatLabelBack(GameManager.instance.researchBack, Color.red);
+                SoundManager.SFX("NegativeButton");
                 return;
             }
             if (_player.UseWorkForceToken())
@@ -91,6 +93,7 @@ public class ActionLabel : MonoBehaviour
         else
         {
             GameManager.instance.FlashStatLabelBack(GameManager.instance.fundingBack, Color.red);
+            SoundManager.SFX("NegativeButton");
         }
     }
 

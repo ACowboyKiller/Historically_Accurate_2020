@@ -332,9 +332,14 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
-        if (!isCountrySelected) return;
+        if (!isCountrySelected)
+        {
+            SoundManager.SFX("NegativeButton");
+            return;
+        }
         MoveToGameplay(_setup);
         _textInput.Init();
+        SoundManager.SFX("StartGame");
     }
 
     /// <summary>
@@ -607,6 +612,7 @@ public class GameManager : MonoBehaviour
         {
             _title.material.DOFade(0f, 0.5f);
             MoveToSetup(_splash);
+            SoundManager.SFX("StartGame");
         }
 
         /// Push the timer bar as needed
