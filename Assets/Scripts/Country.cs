@@ -125,6 +125,7 @@ public class Country : MonoBehaviour
             if (isPlayerControlled) SoundManager.SFX("NegativeButton");
             return false;
         }
+        if (isPlayerControlled) SoundManager.SFX("PositiveButton");
         _fundingPoints -= _tokenCost;
         _tokenCost *= 2;
         _workforceTokens++;

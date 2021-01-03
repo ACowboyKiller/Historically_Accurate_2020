@@ -189,6 +189,11 @@ public class GameManager : MonoBehaviour
     public Image playerFlag => (playerCountry.countryName == CountryName.USA) ? _USAFlag : _USSRFlag;
     public Image aiFlag => (aiCountry.countryName == CountryName.USA) ? _USAFlag : _USSRFlag;
 
+    /// <summary>
+    /// Returns the text pulse on the instructions text
+    /// </summary>
+    public PulseText instructionsTextPulse => _instructionsTextPulse;
+
 
     #endregion
 
@@ -293,6 +298,8 @@ public class GameManager : MonoBehaviour
     /// <param name="_pCountry"></param>
     public void SelectCountry(int _pCountry)
     {
+        _startButtonText.text = "Start Game";
+        _startButtonText.gameObject.GetComponent<PulseText>().Pulse();
         isCountrySelected = true;
         if (playerCountry != null) playerCountry.isPlayerControlled = false;
         _countries.Find(c => c.countryName == (CountryName)_pCountry).isPlayerControlled = true;
@@ -315,6 +322,7 @@ public class GameManager : MonoBehaviour
     {
         _gameplayBackground.DOFade(0f, 0.25f);
         _instructions.text = _pInstructions;
+        instructionsTextPulse.Pulse();
     }
 
     /// <summary>
@@ -325,6 +333,7 @@ public class GameManager : MonoBehaviour
         _gameplayBackground.DOFade(1f, 0.25f);
         _instructions.text = "Type the name of an action to be performed";
         _textInput.textInput.Select();
+        instructionsTextPulse.Steady();
     }
 
     /// <summary>
@@ -332,6 +341,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
+        _startButtonText.gameObject.GetComponent<PulseText>().Steady();
         if (!isCountrySelected)
         {
             SoundManager.SFX("NegativeButton");
@@ -403,6 +413,7 @@ public class GameManager : MonoBehaviour
         _camTarget.DOMove(Vector3.zero, 2f);
         DOTween.To(() => _transposer.m_Heading.m_Bias, x => _transposer.m_Heading.m_Bias = x, 0f, 2f);
 
+        _startButtonText.text = "Select Country";
         _textInput.textInput.text = "";
         timerMod = 1f;
         OnTimerEmptyEvent = null;
@@ -462,6 +473,11 @@ public class GameManager : MonoBehaviour
     /// The virtual camera's transposer
     /// </summary>
     private Cinemachine.CinemachineOrbitalTransposer _transposer = null;
+
+    /// <summary>
+    /// The text for the start button
+    /// </summary>
+    [SerializeField] private TMP_Text _startButtonText = null;
 
     /// <summary>
     /// The timer for the game's QTEs
@@ -575,6 +591,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image _USAFlag = null;
 
     [SerializeField] private Image _USSRFlag = null;
+
+    [SerializeField] private PulseText _instructionsTextPulse = null;
 
     #endregion
 

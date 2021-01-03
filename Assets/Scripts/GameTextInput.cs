@@ -87,8 +87,9 @@ public class GameTextInput : MonoBehaviour
     {
         if (GameManager.state == GameManager.GameState.Gameplay && !textInput.isFocused)
         {
-            textInput.Select();
             textInput.text = "";
+            textInput.Select();
+            textInput.ActivateInputField();
         }
     }
 
@@ -116,6 +117,7 @@ public class GameTextInput : MonoBehaviour
         //  Reset the value or maintain if it's valid
         _textValueCache = (_isValid && _pValue != "|") ? _pValue : _textValueCache;
         _textInput.text = _textValueCache;
+        if (_isValid) SoundManager.SFX("InputType");
     }
 
     /// <summary>
