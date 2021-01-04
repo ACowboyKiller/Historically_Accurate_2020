@@ -102,6 +102,7 @@ public class FlaskQTE : MonoBehaviour
         }
         _flask.gameObject.SetActive(false);
         GameManager.instance.EndQTE();
+        if (_country.isPlayerControlled) SoundManager.SFX("NegativeButton");
         /// TODO:   Play a sound
     }
 

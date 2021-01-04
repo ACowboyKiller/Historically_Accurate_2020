@@ -350,6 +350,10 @@ public class GameManager : MonoBehaviour
         MoveToGameplay(_setup);
         _textInput.Init();
         SoundManager.SFX("StartGame");
+        PlayerPrefs.SetString("Recommended", "Complete");
+        PlayerPrefs.Save();
+        _recommendedText.SetActive(false);
+        _recommendedDifficultyText.SetActive(false);
     }
 
     /// <summary>
@@ -594,6 +598,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private PulseText _instructionsTextPulse = null;
 
+    [SerializeField] private GameObject _recommendedText = null;
+    [SerializeField] private GameObject _recommendedDifficultyText = null;
+
     #endregion
 
     #region --------------------    Private Methods
@@ -615,7 +622,12 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Sets up the camera transposer
     /// </summary>
-    private void Start() => _transposer = _cam.GetCinemachineComponent<Cinemachine.CinemachineOrbitalTransposer>();
+    private void Start()
+    {
+        _transposer = _cam.GetCinemachineComponent<Cinemachine.CinemachineOrbitalTransposer>();
+        _recommendedText.SetActive(!PlayerPrefs.HasKey("Recommended"));
+        _recommendedDifficultyText.SetActive(!PlayerPrefs.HasKey("Recommended"));
+    }
 
     /// <summary>
     /// Used for updating the progress bars
